@@ -99,7 +99,7 @@ $ cat "task=7,pc_region_size=4096,pc_block_size=64,message=try_ptr_chasing_test"
 
 To find more details about LENS options:
 
-```shell
+```
 $ cat /proc/lens
 
 LENS task=<task> op=<op> [options]
