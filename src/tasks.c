@@ -188,7 +188,7 @@ int latency_job(void *arg)
 		average = total / LATENCY_OPS_COUNT;
 		stddev	= 0;
 		for (j = 0; j < LATENCY_OPS_COUNT; j++) {
-			stddev += (rbuf[i] - average) * (rbuf[i] - average);
+			stddev += (rbuf[j] - average) * (rbuf[j] - average);
 		}
 		kr_info("[%d]%s avg %lu, stddev^2 %lu, max %lu, min %lu\n", i,
 			latency_tasks_str[i], average,
@@ -238,7 +238,7 @@ int latency_job(void *arg)
 		average = total / LATENCY_OPS_COUNT;
 		stddev	= 0;
 		for (j = 0; j < LATENCY_OPS_COUNT; j++) {
-			stddev += (rbuf[i] - average) * (rbuf[i] - average);
+			stddev += (rbuf[j] - average) * (rbuf[j] - average);
 		}
 		kr_info("[%d]%s avg %lu, stddev^2 %lu, max %lu, min %lu\n", i,
 			latency_tasks_str[i], average,
