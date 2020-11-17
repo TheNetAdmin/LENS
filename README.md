@@ -173,6 +173,18 @@ NVDIMM Firmware | 01.01.00.5253
 KASLR | Disabled
 CPU mitigations | Off
 
+## Bibliography
+
+```bibtex
+@inproceedings{LENS-VANS,
+  author={Zixuan Wang and Xiao Liu and Jian Yang and Theodore Michailidis and Steven Swanson and Jishen Zhao},
+  booktitle={2020 53rd Annual IEEE/ACM International Symposium on Microarchitecture (MICRO)}, 
+  title={Characterizing and Modeling Non-Volatile Memory Systems}, 
+  year={2020},
+  pages={496-508},
+  doi={10.1109/MICRO50266.2020.00049}
+}
+```
 
 ## License
 
