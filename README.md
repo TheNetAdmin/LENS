@@ -2,7 +2,7 @@
 
 LENS is a low-level non-volatile memory profiler, which is built based on [LATTester](https://github.com/NVSL/OptaneStudy).
 
-LENS is part of our [MICRO 2020 paper](https://cseweb.ucsd.edu/~ziw002/files/micro20-lens-vans.pdf).
+LENS is part of our [MICRO 2020 paper](https://github.com/TheNetAdmin/LENS-VANS).
 
 ## Introduction
 
