@@ -17,8 +17,12 @@ indent_size = 8
 trim_trailing_whitespace = false
 
 # General 4-space files
-[*.{pl,pm,py,tc,json,tc,sh}]
+[*.{pl,pm,py,tc,json,tc}]
 indent_style = space
+indent_size = 4
+
+[*.sh]
+indent_style = tab
 indent_size = 4
 
 # General 2-space files

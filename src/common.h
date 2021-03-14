@@ -99,34 +99,45 @@
 	"rdtscp \n"                                                            \
 	"lfence \n"                                                            \
 	"mov %%edx, %%r9d \n"                                                  \
-	"mov %%eax, %%r8d \n"
+	"shl $32,   %%r9  \n"                                                  \
+	"or %%rax,  %%r9  \n"
 
-/* r9d = old EDX
- * r8d = old EAX
+/* r9 = rdtscp value
  * Here is what we do to compute t1 and t2:
  * - RDX holds t2
- * - RAX holds t1
+ * - R9  holds t1
  */
 #define TIMING_END                                                             \
 	"mfence \n"                                                            \
 	"rdtscp \n"                                                            \
 	"lfence \n"                                                            \
-	"shl $32, %%rdx \n"                                                    \
+	"shl $32,   %%rdx \n"                                                  \
 	"or  %%rax, %%rdx \n"                                                  \
-	"mov %%r9d, %%eax \n"                                                  \
-	"shl $32, %%rax \n"                                                    \
-	"or  %%r8, %%rax \n"                                                   \
-	"mov %%rax, %[t1] \n"                                                  \
+	"mov %%r9,  %[t1] \n"                                                  \
+	"mov %%rdx, %[t2] \n"
+
+#define TIMING_END_CPUID                                                       \
+	"cpuid  \n"                                                            \
+	"rdtscp \n"                                                            \
+	"lfence \n"                                                            \
+	"shl $32,   %%rdx \n"                                                  \
+	"or  %%rax, %%rdx \n"                                                  \
+	"mov %%r9,  %[t1] \n"                                                  \
 	"mov %%rdx, %[t2] \n"
 
 #define TIMING_END_NOFENCE                                                     \
 	"rdtscp \n"                                                            \
-	"shl $32, %%rdx \n"                                                    \
+	"shl $32,   %%rdx \n"                                                  \
 	"or  %%rax, %%rdx \n"                                                  \
 	"mov %%r9d, %%eax \n"                                                  \
-	"shl $32, %%rax \n"                                                    \
-	"or  %%r8, %%rax \n"                                                   \
+	"shl $32,   %%rax \n"                                                  \
+	"or  %%r8,  %%rax \n"                                                  \
 	"mov %%rax, %[t1] \n"                                                  \
 	"mov %%rdx, %[t2] \n"
+
+typedef struct {
+	uint64_t beg;
+	uint64_t end;
+} latency_timing_pair;
 
 #endif // COMMON_H

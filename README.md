@@ -131,7 +131,7 @@ Options:
         [write_size|z]     For Straight Write: access size, default=0
         [fence_rate|f]     Access size before issuing a sfence instruction
         [clwb_rate|c]      Access size before issuing a clwb instruction
-        [probe_count|r]    Number of test rounds
+        [repeat|r]    Number of test rounds
         [message|m]        A string as a unique ID for the current job
 
 Available pointer chasing benchmarks:

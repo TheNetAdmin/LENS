@@ -43,12 +43,18 @@
 #include <linux/version.h>
 
 #include "lat.h"
+#include "comp_utils/dax_check.h"
 
 int support_clwb = 0;
 static struct report_sbi *g_report_sbi = NULL;
 
+#ifndef X86_FEATURE_CLFLUSHOPT
 #define X86_FEATURE_CLFLUSHOPT (9 * 32 + 23) /* CLFLUSHOPT instruction */
+#endif
+
+#ifndef X86_FEATURE_CLWB
 #define X86_FEATURE_CLWB       (9 * 32 + 24) /* CLWB instruction */
+#endif
 
 static inline bool arch_has_clwb(void)
 {
@@ -76,7 +82,7 @@ static int reportfs_fill_super(struct super_block *sb, void *data, int silent)
 		return -ENOMEM;
 
 	if (g_report_sbi) {
-		pr_err("Another ReportFS already at VA %p PA %llx\n",
+		pr_err("Another ReportFS already at VA %px PA %llx\n",
 		       g_report_sbi->virt_addr, g_report_sbi->phys_addr);
 		return -EEXIST;
 	} else {
@@ -86,33 +92,24 @@ static int reportfs_fill_super(struct super_block *sb, void *data, int silent)
 	sb->s_fs_info = sbi;
 	sbi->sb = sb;
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 17, 6)
-	ret = bdev_dax_supported(sb, PAGE_SIZE);
-#else
-	ret = bdev_dax_supported(sb->s_bdev, PAGE_SIZE);
-#endif
-	pr_info("%s: dax_supported = %d; bdev->super=0x%p", __func__, ret,
+	ret = check_dax(sb, PAGE_SIZE);
+	pr_info("%s: dax_supported = %d; bdev->super=0x%px", __func__, ret,
 		sb->s_bdev->bd_super);
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 17, 6)
 	if (ret) {
-#else
-	if (!ret) {
-#endif
 		pr_err("device does not support DAX\n");
 		return -EINVAL;
 	}
 
 	sbi->s_bdev = sb->s_bdev;
 
-	dax_dev = fs_dax_get_by_host(sb->s_bdev->bd_disk->disk_name);
+	dax_dev = dax_get_by_host(sb->s_bdev->bd_disk->disk_name);
 	if (!dax_dev) {
 		pr_err("Couldn't retrieve DAX device.\n");
 		return -EINVAL;
 	}
 
 	size = dax_direct_access(dax_dev, 0, LONG_MAX / PAGE_SIZE, &virt_addr,
-				 &__pfn_t) *
-	       PAGE_SIZE;
+				 &__pfn_t) * PAGE_SIZE;
 	if (size <= 0) {
 		pr_err("direct_access failed\n");
 		return -EINVAL;
@@ -122,9 +119,9 @@ static int reportfs_fill_super(struct super_block *sb, void *data, int silent)
 	sbi->phys_addr = pfn_t_to_pfn(__pfn_t) << PAGE_SHIFT;
 	sbi->initsize  = size;
 
-	pr_info("%s: dev %s, phys_addr 0x%llx, virt_addr %p, size %ld\n",
-		__func__, sbi->s_bdev->bd_disk->disk_name, sbi->phys_addr,
-		sbi->virt_addr, sbi->initsize);
+	pr_info("%s: dev %s, phys_addr 0x%llx, virt_addr 0x%016llx, size %ld\n",
+		__func__, sbi->s_bdev->bd_disk->disk_name, (uint64_t)sbi->phys_addr,
+		(uint64_t)sbi->virt_addr, sbi->initsize);
 
 	root = new_inode(sb);
 	if (!root) {
@@ -134,12 +131,23 @@ static int reportfs_fill_super(struct super_block *sb, void *data, int silent)
 
 	root->i_ino = 0;
 	root->i_sb  = sb;
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 20, 0)
-	root->i_atime = root->i_mtime = root->i_ctime = current_kernel_time();
-#else
-	ktime_get_coarse_real_ts64(&root->i_ctime);
-	root->i_atime = root->i_mtime = root->i_ctime;
-#endif
+	pr_info("DEBUG: rep: root->i_ctime[%px]=%llu\n", &root->i_ctime, root->i_ctime.tv_sec);
+// #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 20, 0)
+// 	// ktime_get_ts64(&root->i_ctime);
+// 	root->i_ctime = ktime_to_timespec64(ktime_get_real());
+// #else
+// 	ktime_get_coarse_real_ts64(&root->i_ctime);
+// #endif
+	pr_info("DEBUG: rep: root->i_ctime[%px]=%llu\n", &root->i_ctime, root->i_ctime.tv_sec);
+	// root->i_atime = root->i_mtime = root->i_ctime;
+	root->i_atime.tv_sec = root->i_ctime.tv_sec;
+	root->i_atime.tv_nsec = root->i_ctime.tv_nsec;
+	root->i_mtime.tv_sec = root->i_ctime.tv_sec;
+	root->i_mtime.tv_nsec = root->i_ctime.tv_nsec;
+	/* 
+	 * Linux 5.12 introduced `struct user_namespace *mnt_userns` as the 1st
+	 * arg of inode_init_owner.
+	 */
 	inode_init_owner(root, NULL, S_IFDIR);
 
 	sb->s_root = d_make_root(root);
@@ -148,6 +156,9 @@ static int reportfs_fill_super(struct super_block *sb, void *data, int silent)
 		return -ENOMEM;
 	}
 
+	pr_info("[%s] sb->s_root=0x%px", __func__, sb->s_root);
+	pr_info("done");
+
 	return 0;
 }
 
@@ -155,7 +166,12 @@ static struct dentry *reportfs_mount(struct file_system_type *fs_type,
 				     int flags, const char *dev_name,
 				     void *data)
 {
-	return mount_bdev(fs_type, flags, dev_name, data, reportfs_fill_super);
+	struct dentry *ret;
+	if (!dev_name || !*dev_name) {
+		BUG_ON("dev_name is NULL\n");
+	}
+	ret = mount_bdev(fs_type, flags, dev_name, data, reportfs_fill_super);
+	return ret;
 }
 
 static struct file_system_type reportfs_fs_type = {

@@ -1,0 +1,8 @@
+**/*.csv
+**/*.zip
+**/*.pdf
+**/*.db
+**/*.redis
+
+redis/redis-port-6379-*
+redis/dump.rdb

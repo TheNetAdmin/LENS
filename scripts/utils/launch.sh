@@ -1,27 +1,21 @@
 #!/bin/bash
 # Launch LENS probers
 
-export TaskID=${TaskID:-$(hostname)-$(date +%Y%m%d%H%M%S)}
-export TaskDir="$(realpath $(dirname $0))/../../results/$TaskID"
+DefaultConfig=$(realpath $(dirname $0))/default.sh
+if [ -f $DefaultConfig ]; then
+    source $DefaultConfig
+fi
 
-EMon=${EMon:-0}
-EMonEventFile=${EMonEventFile:emon/events.txt}
+export TaskID=$(date +%Y%m%d%H%M%S)-$(git rev-parse --short HEAD)-${TaskID:-$(hostname)}
+export TaskDir="$(realpath $(dirname $0))/../../results/tasks/$TaskID"
 
+# Profiler envs
+Profiler=${Profiler:-none}
+source $(realpath $(dirname $0))/profiler/$Profiler/profiler.sh
+
+# Slack envs
 Slack=${Slack:-0}
 SlackURL=${SlackURL:-}
-
-load_emon() {
-    if [ "$EMon" = "1" ]; then
-        source /opt/intel/emon/sep_vars.sh /dev/null 2>&1
-        (cd $SEPDRV_DIR && ./insmod-sep)
-    fi
-}
-
-unload_emon() {
-    if [ "$EMon" = "1" ]; then
-        (cd $SEPDRV_DIR && ./rmmod-sep 2>&1 >/dev/null)
-    fi
-}
 
 prepare() {
     if [ $Slack -ne 0 ]; then
@@ -29,32 +23,44 @@ prepare() {
         slack_notice $SlackURL "[$TaskID] Start"
     fi
 
+    echo "Start prepare process"
+
     # Disable DVFS
-    for line in $(find /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor); do
-        echo "set performance mode for $line"
-        echo "performance" >$line
-    done
+	if [ "${boost_cpu}" != "n" ]; then
+		for line in $(find /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor); do
+			echo "set performance mode for $line"
+			sudo bash -c "echo 'performance' >$line"
+		done
+	else
+		echo "Skipping boosting cpu"
+	fi
 
     # Disable cache prefetcher
-    wrmsr -a 0x1a4 0xf
+	if [ "${disable_prefetcher}" != "n" ]; then
+		echo "Disabling cache prefetcher"
+		if ! sudo lsmod | grep -q "msr"; then
+			sudo modprobe msr
+		fi
+		sudo wrmsr -a 0x1a4 0xf
+	else
+		echo "Skipping disabling cache prefetcher"
+	fi
 
-    # Load and start EMon
-    if [ "$EMon" = "1" ]; then
-        load_emon
-        emon -i $EMonEventFile -f $TaskDir/emon.dat &
-    fi
+    # Load and start profiler
+    echo "Loading profiler [$Profiler]"
+    load_profiler
+
+    echo "Finished prepare process"
 }
 
 cleanup() {
     # Enable cache prefetcher
-    wrmsr -a 0x1a4 0x0
+	if [ "${disable_prefetcher}" != "n" ]; then
+		sudo wrmsr -a 0x1a4 0x0
+	fi
 
-    # Stop and unload EMon
-    if [ "$EMon" = "1" ]; then
-        # Stop emon if exists
-        emon -stop 2>&1 >/dev/null
-        unload_emon
-    fi
+    # Stop and unload profiler
+    unload_profiler
     
     if [ $Slack -ne 0 ]; then
         slack_notice $SlackURL "[$TaskID] End"
@@ -65,14 +71,14 @@ sigint_handler2() {
     trap sigint_handler2 SIGINT
     echo "$0: Be patient..."
     cleanup
-    exit 0
+    exit 1
 }
 
 sigint_handler() {
     trap sigint_handler2 SIGINT
     echo "$0: Received SIGINT, exiting..."
     cleanup
-    exit 0
+    exit 1
 }
 
 trap sigint_handler SIGINT
@@ -80,17 +86,36 @@ mkdir -p $TaskDir
 
 prepare
 
-dmesg --read-clear > $TaskDir/dmesg_before.txt
+sudo dmesg --read-clear > $TaskDir/dmesg_before.txt
 
 {
-    echo \#\#\# LENS: Start running task $@
+    echo \#\#\# LENS: Start running task "$@"
+    echo
+	echo \#\#\# Hostname: $(hostname)
+	echo
+    echo \#\#\# LENS info:
+    echo
+         cat /proc/lens
+    echo
+    echo \#\#\# LENS MAKE ARGS:
+    echo "$LENS_MAKE_ARGS"
+    echo
+    echo \#\#\# GCC:
+    echo gcc --version
     echo
     echo \#\#\# CPUInfo:
-         cat /proc/cpuinfo
     echo
          lscpu
     echo
+    echo \#\#\# MTRR:
+    echo
+        cat /proc/mtrr
+    echo
     echo \#\#\# "MSR 0x1a4 (cache prefetcher) status:"
+         if ! rdmsr -a 0x1a4; then 
+            echo "ERROR: rdmsr failed"
+            exit 1
+         fi
          rdmsr -a 0x1a4 | tr '\n' ' '
     echo
     echo \#\#\# ndctl list:
@@ -118,13 +143,16 @@ dmesg --read-clear > $TaskDir/dmesg_before.txt
     echo
     echo \#\#\# TaskID:        $TaskID
     echo \#\#\# TaskDir:       $TaskDir
-    echo \#\#\# EMon:          $EMon
-    echo \#\#\# EMonEventFile: $EMonEventFile
     echo \#\#\# Slack:         $Slack
     echo \#\#\# SlackURL:      $SlackURL
     echo
-    echo \#\#\# RepDev: `mount | grep ReportFS | awk {'print \$1'}`
-    echo \#\#\# TestDev: `mount | grep LatencyFS | awk {'print \$1'}`
+        print_profiler
+    echo
+    echo \#\#\# RepDev: $(mount | grep ReportFS | awk '{print $1}')
+        if [ -z $rep_dev ]; then
+            export rep_dev="$(mount | grep ReportFS | awk '{print $1}')"
+        fi
+    echo \#\#\# TestDev: $(mount | grep LatencyFS | awk '{print $1}')
     echo
     echo \#\#\# Commit ID: $(git rev-parse --short HEAD)
     echo \#\#\# Commit Status: $(git diff-index --quiet HEAD -- || echo "dirty")
@@ -135,6 +163,15 @@ dmesg --read-clear > $TaskDir/dmesg_before.txt
         git diff >$TaskDir/diff.txt
     fi
 
+    # echo \#\#\# Copying object files for debugging
+    # echo
+    #     cp $(realpath $(realpath $(dirname $0))/../../src/tasks.o) $TaskDir/tasks.o
+    # echo
+
+    echo
+    echo \#\#\# Start profiler: $Profiler
+    start_profiler
+
     echo
     echo \#\#\# TS_Start $(cat /proc/uptime | sed 's/ [0-9.]*//')
 
@@ -143,11 +180,16 @@ dmesg --read-clear > $TaskDir/dmesg_before.txt
 
     echo
     echo \#\#\# TS_End $(cat /proc/uptime | sed 's/ [0-9.]*//')
+    echo
+    echo  \#\#\# Stop profiler: $Profiler
+    stop_profiler
+    echo
     echo \#\#\# ExitCode: $ExitCode
-} > >(tee -a $TaskDir/stdout.log) 2> >(tee -a $TaskDir/stderr.log >&2)
+} > >(ts '[%Y-%m-%d %H:%M:%S]' | tee -a "$TaskDir/stdout.log") \
+ 2> >(ts '[%Y-%m-%d %H:%M:%S]' | tee -a "$TaskDir/stderr.log" >&2)
 
 cleanup
 
-dmesg >$TaskDir/dmesg_after.txt
+sudo dmesg >"$TaskDir/dmesg_after.txt"
 
 exit $ExitCode

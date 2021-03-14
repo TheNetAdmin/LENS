@@ -20,7 +20,7 @@ for accesssize in ${access_array[@]};  do
 		echo "task=13,access_size=$accesssize,stride_size=$stridesize,message=$msg,op=$op" > /proc/lattester
 		while true; do
 			sleep 1
-			x=`dmesg | tail -n 50 | grep "LATTester_FF_END: $accesssize-$stridesize-$op"`
+			x=`dmesg | grep "LATTester_FF_END: $accesssize-$stridesize-$op"`
 			if [[ $x ]]; then
 				break;
 			fi

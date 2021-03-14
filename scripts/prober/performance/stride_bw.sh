@@ -43,7 +43,7 @@ for accesssize in ${access_array[@]}; do
                 echo $lens_arg >/proc/lens
 
                 while true; do
-                    x=$(dmesg | tail -n 50 | grep "LENS_END: $msg")
+                    x=$(dmesg | grep "LENS_END: $msg")
                     if [[ $x ]]; then
                         break
                     fi

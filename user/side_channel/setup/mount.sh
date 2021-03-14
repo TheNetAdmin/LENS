@@ -1,0 +1,1 @@
+../../inode_covert/mount.sh
