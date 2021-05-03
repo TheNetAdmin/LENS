@@ -122,10 +122,10 @@
 #define TIMING_END_NOFENCE                                                     \
 	"rdtscp \n"                                                            \
 	"shl $32, %%rdx \n"                                                    \
-	"mov %%eax, %%edx \n"                                                  \
+	"or  %%rax, %%rdx \n"                                                  \
 	"mov %%r9d, %%eax \n"                                                  \
 	"shl $32, %%rax \n"                                                    \
-	"mov %%r8d, %%eax \n"                                                  \
+	"or  %%r8, %%rax \n"                                                   \
 	"mov %%rax, %[t1] \n"                                                  \
 	"mov %%rdx, %[t2] \n"
 
