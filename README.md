@@ -116,7 +116,7 @@ Tasks:
         10: Flush First Test [stride_size] [access_size] [op]
 
 Options:
-        [op|o]             Operation: 0=Load, 1=Write(NT) 2=Write(clwb), 3=Write+Flush(clwb+flush) default=0
+        [op|o]             Operation (see source code for the correct op, some tasks may not use the ops defined here): 0=Load, 1=Load(NT) 2=Write(clwb), 3=Write+Flush(clwb+flush) default=0
         [access_size|a]    Access size (bytes), default=64
         [stride_size|s]    Stride size (bytes), default=64
         [pc_region_size|R] Pointer chasing region size (bytes), default=64
