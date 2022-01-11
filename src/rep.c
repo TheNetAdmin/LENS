@@ -99,7 +99,7 @@ static int reportfs_fill_super(struct super_block *sb, void *data, int silent)
 	if (!ret) {
 #endif
 		pr_err("device does not support DAX\n");
-		return ret;
+		return -EINVAL;
 	}
 
 	sbi->s_bdev = sb->s_bdev;
