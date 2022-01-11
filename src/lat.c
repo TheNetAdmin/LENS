@@ -357,7 +357,7 @@ static int latencyfs_fill_super(struct super_block *sb, void *data, int silent)
 	struct dax_device *dax_dev;
 	pfn_t __pfn_t;
 	long size;
-	int ret = 0;
+	int ret;
 
 	if (rep_sbi) {
 		pr_err("Already mounted\n");
@@ -391,7 +391,7 @@ static int latencyfs_fill_super(struct super_block *sb, void *data, int silent)
 	if (!ret) {
 #endif
 		pr_err("device does not support DAX\n");
-		return ret;
+		return -EINVAL;
 	}
 
 	sbi->s_bdev = sb->s_bdev;
@@ -441,7 +441,7 @@ static int latencyfs_fill_super(struct super_block *sb, void *data, int silent)
 
 	global_sbi = sbi;
 
-	return ret;
+	return 0;
 }
 
 static struct dentry *latencyfs_mount(struct file_system_type *fs_type,
