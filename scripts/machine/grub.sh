@@ -39,10 +39,10 @@ grub_setup_aep2() {
     fi
 
 cat <<- EOF >>$grub_file
-### Zixuan grub start
+### NVLeak grub start
 GRUB_DEFAULT=${grub_default_kernel}
 GRUB_CMDLINE_LINUX="rd.lvm.lv=fedora/root rd.lvm.lv=fedora/swap rhgb quiet console=ttyS0,115200 modprobe.blacklist=noueavu modprobe.blacklist=qat_c62x nokaslr memmap=32G!16G log-buf-len=1G"
-### Zixuan grub end
+### NVLeak grub end
 EOF
 }
 
@@ -50,10 +50,10 @@ grub_setup_sdp() {
     grub_default_kernel=0
 
 cat <<- EOF >>$grub_file
-### Zixuan grub start
+### NVLeak grub start
 GRUB_DEFAULT=${grub_default_kernel}
 GRUB_CMDLINE_LINUX="nokaslr memmap=32G!16G log-buf-len=1G mitigations=off"
-### Zixuan grub end
+### NVLeak grub end
 EOF
 }
 
@@ -62,17 +62,17 @@ grub_setup_nv_4() {
     grub_default_kernel=0
 
 cat <<- EOF >>$grub_file
-### Zixuan grub start
+### NVLeak grub start
 GRUB_DEFAULT=${grub_default_kernel}
 GRUB_CMDLINE_LINUX="nokaslr memmap=32G!16G log-buf-len=1G mitigations=off"
-### Zixuan grub end
+### NVLeak grub end
 EOF
 }
 
 grub_setup() {
     echo "Grub setup"
 
-    if grep -q "Zixuan grub start" "$grub_file"; then
+    if grep -q "NVLeak grub start" "$grub_file"; then
         echo "Config already in grub file"
         exit 1
     fi
@@ -105,7 +105,7 @@ grub_reset() {
     echo "Grub reset"
     
     # https://stackoverflow.com/questions/37680636/sed-multiline-delete-with-pattern
-    sed -i '/### Zixuan grub start/{:a;N;/### Zixuan grub end/!ba};//d' $grub_file
+    sed -i '/### NVLeak grub start/{:a;N;/### NVLeak grub end/!ba};//d' $grub_file
 
     cp $grub_file $operation_path/grub.aft
 
