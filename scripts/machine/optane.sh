@@ -1,6 +1,7 @@
 #!/bin/bash
 
-set -ex
+set -e
+set -x
 
 curr_path=$(realpath $(dirname $0))
 grub_file=/etc/default/grub
@@ -112,7 +113,7 @@ ndctl_check_local() {
 }
 
 ndctl_check_all_removed() {
-    remaining_regions=$(ipmctl show -region | grep -c '0.0 GiB')
+    remaining_regions=$(ipmctl show -region | grep -c '0.000 GiB')
     if [ "$remaining_regions" -gt 0 ]; then
         echo "ERROR: There are remaining regions not deleted!!!"
         ipmctl show -region

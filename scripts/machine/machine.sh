@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eu
+
 curr_path=$(realpath $(dirname $0))
 
 case $1 in
