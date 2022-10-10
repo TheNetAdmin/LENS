@@ -60,7 +60,7 @@ $ pip3 install click numpy
 An example to parse `pointer_chasing.sh` results:
 
 ```shell
-$ python3 scripts/prober/buffer/parse.py pointer_chasing \
+$ python3 scripts/prober/buffer/parse.py pointer-chasing \
           --src_file results/your_task_id/stdout.log \
           --out_file pointer_chasing.csv
 ```
