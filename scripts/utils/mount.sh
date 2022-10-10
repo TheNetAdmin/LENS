@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Compile code, mount ReportFS and LatencyFS
 
 set -e
