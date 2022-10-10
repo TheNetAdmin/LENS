@@ -1,8 +1,15 @@
 #! /bin/bash
 
+# By default do not send slack message
+Slack=${Slack:-0}
+
 slack_notice() {
     # $1 Slack URL
     # $2 Slack messageiter
+	if [ -z "$Slack" ] || [ "$Slack" -eq 0 ]; then
+		echo "Skip sending slack message: [$*]"
+	fi
+
 	if [ $# -ne 2 ]; then
 		echo "slack_notice needs 2 arguments, but got $#"
 		exit 1

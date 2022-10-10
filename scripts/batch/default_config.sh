@@ -2,7 +2,8 @@
 
 export host_name=$(hostname | tr -d "[:space:]")
 export script_root="$(realpath "$(realpath "$(dirname "$0")")"/../)"
-export SlackURL=https://hooks.slack.com/services/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
+export Slack=0
+export SlackURL=""
 export SlackUserID="@U01QVMG14HH"
 
 case "${host_name}" in

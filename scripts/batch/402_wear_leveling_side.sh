@@ -17,8 +17,6 @@ script_root=$(realpath $(realpath $(dirname $0))/../)
 source "$script_root/utils/check_mtrr.sh"
 check_mtrr uncacheable
 
-export SlackURL=https://hooks.slack.com/services/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
-source "$script_root/utils/slack.sh"
 
 rep_dev="${rep_dev:-/dev/pmem0}"
 lat_dev="${lat_dev:-/dev/pmem13}"
