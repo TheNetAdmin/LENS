@@ -35,7 +35,7 @@ case "${host_name}" in
 	;;
 	nv-4)
 		export rep_dev="${rep_dev:-/dev/pmem0}"
-		export lat_dev="${lat_dev:-/dev/pmem2}"
+		export lat_dev="${lat_dev:-/dev/pmem1}"
 		# [    0.000000] user: [mem 0x0000001840000000-0x000000d53fffffff] persistent (type 7)
 		# [6109977.118667] reportfs_fill_super: dev pmem0, phys_addr 0x400000000, virt_addr 00000000a5b7ce1d, size 17179869184
 		# [6109977.134381] latencyfs_fill_super: dev pmem2, phys_addr 0x18be200000, virt_addr 00000000ab30e843, size 133175443456
