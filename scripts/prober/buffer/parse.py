@@ -92,6 +92,7 @@ def amplification(src_file, out_file):
         else:
             r['wpq_write_amp'] = 1 
         res.append(r)
+    res.sort(key = lambda x: x['block_size'])
     with open(out_file, 'w') as f:
         writer = csv.DictWriter(f, fieldnames=res[0].keys())
         writer.writeheader()
