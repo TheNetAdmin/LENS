@@ -41,13 +41,16 @@ read_after_write)
     ;;
 esac
 
+# default dimm size limit is 100GiB
+dimm_size=$((100 * 2 ** 30))
+
 if [ $# -eq 1 ]; then
     region_small=(64 128 256 512 1024 2048 4096 8192)
     region_med=($(seq -s ' ' $((2 ** 14)) $((2 ** 12)) $((2 ** 16))))
     region_large=($(seq -s ' ' $((2 ** 22)) $((2 ** 22)) $((2 ** 26))))
 
     region_array=("${region_small[@]}" "${region_med[@]}" "${region_large[@]}")
-    block_array=(64 256 4096)
+    block_array=(64)
 else
     region_array=($2)
     block_array=($3)
@@ -59,7 +62,10 @@ echo Test op index: $op
 
 for block_size in ${block_array[@]}; do
     for region_size in ${region_array[@]}; do
-        if (($region_size % $block_size != 0)); then
+        if ((region_size % block_size != 0)); then
+            continue
+        fi
+        if ((region_size * block_size > dimm_size)); then
             continue
         fi
 
