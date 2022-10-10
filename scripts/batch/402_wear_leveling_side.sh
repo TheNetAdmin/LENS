@@ -29,12 +29,8 @@ if test "${rep_dev}" == "${lat_dev}"; then
 fi
 
 function run_prober() {
-	# NOTE: single test takes ~5mins, run it 3 rounds takes too much time
-	export Profiler=aepwatch
-	if [ "$host_name" == "lens" ]; then
-		export Profiler=none
-	fi
-	yes | $script_root/lens.sh "${rep_dev}" "${lat_dev}" "$@"
+    export Profiler=none # none | emon | aepwatch
+    yes | ${script_root}/lens.sh "${rep_dev}" "${lat_dev}" "$@"
 }
 
 function estimate_time_hours() {

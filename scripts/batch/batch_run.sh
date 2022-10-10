@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -e
-set -x
 
 # BATCH_ID: MM-DD-YYYY-ScriptID-ID
 
@@ -28,7 +27,7 @@ all_script_id=("$@")
 while true; do
 	echo "Perform operation: $operation"
     echo "These tasks selected: " "${all_script_id[@]}"
-    read -r -p "Start to run them [y/n]" yn
+    read -r -p "Start to run them [y/n]: " yn
     case $yn in
         [Yy]* ) break;;
         [Nn]* ) exit;;

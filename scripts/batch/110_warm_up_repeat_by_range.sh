@@ -18,12 +18,8 @@ source "$script_root/utils/check_mtrr.sh"
 check_mtrr uncacheable
 
 function run_prober() {
-    # export Profiler=none
-    # yes | $script_root/lens.sh "${rep_dev}" "${lat_dev}" "$@"
-    # export Profiler=emon
-    # yes | $script_root/lens.sh "${rep_dev}" "${lat_dev}" "$@"
-    export Profiler=aepwatch
-    yes | $script_root/lens.sh "${rep_dev}" "${lat_dev}" "$@"
+    export Profiler=none # none | emon | aepwatch
+    yes | ${script_root}/lens.sh "${rep_dev}" "${lat_dev}" "$@"
 }
 
 region_array=(

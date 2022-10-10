@@ -16,13 +16,8 @@ script_root=$(realpath $(realpath $(dirname $0))/../)
 
 
 function run_prober() {
-    # NOTE: single test takes ~5mins, run it 3 rounds takes too much time
-    # export Profiler=none
-    # yes | $script_root/lens.sh "${rep_dev}" "${lat_dev}" "$@"
-    export Profiler=emon
-    yes | $script_root/lens.sh "${rep_dev}" "${lat_dev}" "$@"
-    # export Profiler=aepwatch
-    # yes | $script_root/lens.sh "${rep_dev}" "${lat_dev}" "$@"
+    export Profiler=none # none | emon | aepwatch
+    yes | ${script_root}/lens.sh "${rep_dev}" "${lat_dev}" "$@"
 }
 
 function estimate_time_hours() {

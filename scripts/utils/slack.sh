@@ -8,6 +8,7 @@ slack_notice() {
     # $2 Slack messageiter
 	if [ -z "$Slack" ] || [ "$Slack" -eq 0 ]; then
 		echo "Skip sending slack message: [$*]"
+		return
 	fi
 
 	if [ $# -ne 2 ]; then
