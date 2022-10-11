@@ -17,6 +17,7 @@ def wear_leveling(src_file, out_file):
     fin = open(src_file, 'rb')
     iter = 1
     with open(out_file, 'w') as f:
+        f.write('iter,lat\n')
         for _ in range(fsize // 8):
             data = struct.unpack('L', fin.read(8))[0]
             f.write(str(iter) + "," + str(data) + '\n')
