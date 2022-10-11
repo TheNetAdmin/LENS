@@ -39,7 +39,7 @@ repeat_array=(
 
 script=${script_root}/prober/wear_leveling/7_warm_up_repeat_by_range.sh
 
-total_jobs=$(bc -l <<<"${#region_array} * ${#threshold_array} * ${#repeat_array}")
+total_jobs=$(bc -l <<<"${#region_array[@]} * ${#threshold_array[@]} * ${#repeat_array[@]}")
 curr_job=0
 
 job=$1
@@ -48,9 +48,9 @@ case $job in
         run_prober ${script} 256 100000 25
     ;;
     all)
-		for region in "${region_array[@]}"; do
+		for region    in "${region_array[@]}"   ; do
 		for threshold in "${threshold_array[@]}"; do
-		for repeat in "${repeat_array[@]}"; do
+		for repeat    in "${repeat_array[@]}"   ; do
 			run_prober ${script} \
 				${region}        \
 				${threshold}     \
