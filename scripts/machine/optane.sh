@@ -16,7 +16,7 @@ echo "nvram_bus=${nvram_bus}"
 
 print_help() {
     echo "$(basename $0) setup appdirect ni|i: non-interleaved or interleaved"
-    echo "$(basename $0) ndctl [devdax|mongo]: create local Optane namespace through ndctl"
+    echo "$(basename $0) ndctl [devdax|fsdevdax|fsdax]: create local Optane namespace through ndctl"
     echo "$(basename $0) status"
     echo "$(basename $0) reset"
 }
