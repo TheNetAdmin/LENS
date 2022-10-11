@@ -1,0 +1,4 @@
+[submodule "user/covert_channel/cross_vm"]
+	path = user/covert_channel/cross_vm
+	url = git@github.com:TheNetAdmin/NVLeak-KUT.git
+	branch = covert-channel
