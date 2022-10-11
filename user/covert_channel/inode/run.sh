@@ -26,7 +26,7 @@ debug) ;;
 	;;
 esac
 
-source ../../scripts/utils/profiler/aepwatch/profiler.sh
+source ../../scripts/utils/profiler/none/profiler.sh
 
 make
 
