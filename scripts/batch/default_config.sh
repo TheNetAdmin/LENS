@@ -4,7 +4,7 @@ export host_name=$(hostname | tr -d "[:space:]")
 export script_root="$(realpath "$(realpath "$(dirname "$0")")"/../)"
 export Slack=0
 export SlackURL=""
-export SlackUserID=""
+export SlackUserID="" # Optional: your Slack user ID (not your user name) which starts with '@U'
 
 case "${host_name}" in
 	AEP2)
