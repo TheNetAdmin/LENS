@@ -96,7 +96,7 @@ def convert_date(orig_date):
     "-d",
     "--data_file",
     required=True,
-    default="../data/nppes_npi/npidata_pfile_20050523-20211107.csv",
+    default="../data/nppes_npi/npidata_pfile_20050523-20220508.csv",
 )
 @click.option(
     "-o", "--out_sqlite_file", required=True, default="../data/nppes_npi/npi_data_ranged.db"

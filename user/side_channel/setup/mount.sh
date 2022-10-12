@@ -1,1 +1,1 @@
-../../inode_covert/mount.sh
+../../covert_channel/inode/mount.sh
