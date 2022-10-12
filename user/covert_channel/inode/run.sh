@@ -3,9 +3,10 @@
 set -e
 
 batch_id="$(date +%Y%m%d-%H-%M-%S)"
+test_dev=${test_dev:-pmem}
 
 usage() {
-	echo "USAGE: ${0} send_1|send_0|test|all|debug"
+	echo "USAGE: ${0} send_1|send_0|test|all|single"
 }
 
 if [ $# -ne 1 ]; then
@@ -19,14 +20,14 @@ send_1) ;;
 send_0) ;;
 test) ;;
 all) ;;
-debug) ;;
+single) ;;
 *)
 	usage
 	exit 1
 	;;
 esac
 
-source ../../scripts/utils/profiler/none/profiler.sh
+source ../../../scripts/utils/profiler/none/profiler.sh
 
 make
 
@@ -81,7 +82,7 @@ run_covert() {
 # args
 declare -A covert_args
 covert_args[recv_single]="-f /mnt/pmem/file2 -i 20000 -o inode -d 100000"
-covert_args[send_single]="-f /mnt/pmem/file1 -i 20000 -o inode -d 10000"
+covert_args[send_single]="-f /mnt/pmem/file1 -i 20000 -o inode -d 1000"
 covert_args[test]="-f /mnt/pmem/file3 -i 20000 -o inode -d 10000"
 
 bench_func() {
@@ -99,9 +100,9 @@ bench_func() {
 	fi
 
 	{
-		iter=1000
+		iter=2000
 		cycle_ddl=$((100000 * iter))
-		dev=pmem
+		dev=${test_dev}
 
 		run_covert send \
 			-r sender \
@@ -115,6 +116,7 @@ bench_func() {
 			> >(tee -a "${TaskDir}/sender.log" >/dev/null) \
 			2>&1 \
 		&
+		sender_pid=$!
 
 
 		run_covert recv \
@@ -128,8 +130,10 @@ bench_func() {
 			> >(tee -a "${TaskDir}/receiver.log" >/dev/null) \
 			2>&1 \
 		&
+		receiver_pid=$!
 
-		wait
+		wait ${sender_pid}
+		wait ${receiver_pid}
 	}
 	cleanup
 }
@@ -158,7 +162,7 @@ case ${op} in
 	}
 	cleanup
 	;;
-	debug)
+	single)
 	export TaskDir=results/${op}/${batch_id}
 	bench_func
 	;;
