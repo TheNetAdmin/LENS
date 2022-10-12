@@ -69,7 +69,7 @@ esac
 
 prepare_sqlite() {
 	tgt_file="/mnt/pmem/sqlite/${sqlite_db_file}"
-	src_file="/home/zixuan/code/nvsec-lens/user/side_channel/data/nppes_npi/${sqlite_db_file}" # TODO: need better file path assignments
+	src_file="$PWD/../data/nppes_npi/${sqlite_db_file}" # TODO: need better file path assignments
 	if [ "$copy_new_db" == "y" ]; then
 		echo "Copy new database file to pmem"
 		mkdir -p "/mnt/pmem/sqlite/"
