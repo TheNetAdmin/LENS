@@ -1,6 +1,14 @@
 # To be sourced
 
-side_channel_iter=$((1200 * 100))
+pageno=${pageno:-none}
+offset=${offset:-none}
+
+if [ "$pageno" == "none" ] || [ "$offset" == "none" ]; then
+	echo "Variable not set: pageno [$pageno] offset [$offset]"
+	exit 2
+fi
+
+side_channel_iter=$((1200 * 300))
 
 function bench_run() {
 	if [ ${side_channel_iter} -ne 0 ]; then
@@ -14,8 +22,8 @@ function bench_run() {
 			-i ${side_channel_iter} \
 			-o probe_lib \
 			-l /mnt/pmem/lib/libwolfssl.so.23.0.0 \
-			-t 40 \
-			-r 3664 \
+			-t $pageno \
+			-r $offset \
 			-e 0 \
 		;
 	fi

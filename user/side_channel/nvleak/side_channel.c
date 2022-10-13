@@ -421,6 +421,7 @@ void print_results(side_channel_info_t *si)
 	       "cache_set_beg=%lu, "
 	       "probe_set_index=%ld, "
 	       "probe_lib_page=%ld, "
+	       "probe_lib_page_offset=%ld "
 	       "probe_sleep=%ld"
 	       "\n\n",
 	       si->role,
@@ -436,6 +437,7 @@ void print_results(side_channel_info_t *si)
 	       si->cache_set_beg,
 	       si->probe_set_idx,
 	       si->probe_lib_page,
+	       si->probe_lib_page_offset,
 	       si->probe_sleep
 	);
 	PRINT_INFO(si->ci);
