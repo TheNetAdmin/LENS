@@ -20,6 +20,7 @@ case "${host_name}" in
 	nv-4)
 		export dram_dev="${dram_dev:-/dev/pmem0}"
 		export pmem_dev="${pmem_dev:-/dev/pmem2}"
+		export dax_dev="${dax_dev:-/dev/dax1.2}"
 	;;
 	lens)
 		# lens vm
