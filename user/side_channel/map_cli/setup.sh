@@ -86,31 +86,6 @@ function mount_pmem() {
 	echo "DONE"
 }
 
-function create_map_file() {
-	map_file_path="${pmem_mnt}/${map_file}"
-	echo "Create map data file [${map_file_path}]"
-	if [ -f "${map_file_path}" ]; then
-		echo "File [${map_file_path}] exists, overwrite it?"
-		select yn in "Yes" "No"; do
-			case $yn in
-				Yes)
-					rm -f "${map_file_path}"
-					break
-				;;
-				No)
-					break
-				;;
-			esac
-		done
-	fi
-
-	if [ ! -f "${map_file_path}" ]; then
-		truncate "${map_file_path}" --size="${map_file_size}"
-	fi
-
-	echo "Create map data file: DONE"
-}
-
 function git_ingore_bin() {
 	echo "${bench_bin}" >.gitignore
 }
@@ -119,8 +94,6 @@ function setup() {
 	link_bench_bin
 	setup_fsdax_devdax
 	mount_pmem
-	# No need to create map file, the binary executable will create it
-	# create_map_file
 	git_ingore_bin
 }
 

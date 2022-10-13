@@ -19,8 +19,12 @@ case "${host_name}" in
 	;;
 	nv-4)
 		export dram_dev="${dram_dev:-/dev/pmem0}"
-		export pmem_dev="${pmem_dev:-/dev/pmem2}"
-		export dax_dev="${dax_dev:-/dev/dax1.2}"
+		export pmem_dev="${pmem_dev:-/dev/pmem1}"
+		export nvleak_path="/home/usenix/NVLeak/nvleak"
+		export pmdk_libpmemobj_cpp_path="${nvleak_path}/user/side_channel/libpmemobj-cpp"
+		dax_attacker=$(ndctl list | jq '.[] | select(.name=="dax-attacker") | .chardev' | tr -d '"')
+		[ -z "${dax_attacker}" ] && dax_attacker="dax_dev_not_found"
+		export dax_dev="${dax_dev:-/dev/${dax_attacker}}"
 	;;
 	lens)
 		# lens vm
