@@ -4,6 +4,8 @@ LENS is a low-level non-volatile memory profiler, which is built based on [LATTe
 
 LENS is part of our [MICRO 2020 paper](https://github.com/TheNetAdmin/LENS-VANS).
 
+Based on LENS we developed NVLeak, which si part of our [USENIX Security 2023 paper](https://github.com/TheNetAdmin/NVLeak)
+
 ## Introduction
 
 LENS contains two modules, each of them needs to be mounted on a pmem device (in fsdax mode):
