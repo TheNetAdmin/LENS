@@ -1,8 +1,8 @@
 [submodule "user/covert_channel/cross_vm"]
 	path = user/covert_channel/cross_vm
-	url = git@github.com:TheNetAdmin/NVLeak-KUT.git
+	url = https://github.com/TheNetAdmin/NVLeak-KUT.git
 	branch = covert-channel
 [submodule "user/side_channel/libpmemobj-cpp"]
 	path = user/side_channel/libpmemobj-cpp
-	url = git@github.com:TheNetAdmin/NVLeak-libpmemobj-cpp.git
+	url = https://github.com/TheNetAdmin/NVLeak-libpmemobj-cpp.git
 	branch = nvleak-mitigation
