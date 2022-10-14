@@ -9,10 +9,10 @@ source ../common.sh
 source ./default.sh
 
 function link_bench_bin() {
-	bench_bin_origin_path="${pmdk_libpmemobj_cpp_path}/build/examples/${bench_bin}"
+	bench_bin_origin_path="${pmdk_libpmemobj_cpp_path}/build/examples/${1}"
 
 	echo -n "Link binary [${bench_bin_origin_path}] to curr dir: "
-	rm -f ${bench_bin}
+	rm -f ${1}
 	ln -s "${bench_bin_origin_path}" .
 	echo "DONE"
 }
@@ -91,7 +91,8 @@ function git_ingore_bin() {
 }
 
 function setup() {
-	link_bench_bin
+	link_bench_bin "${bench_bin}"
+	link_bench_bin "${bench_bin_secure}"
 	setup_fsdax_devdax
 	mount_pmem
 	git_ingore_bin

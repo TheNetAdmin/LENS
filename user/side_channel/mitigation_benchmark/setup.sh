@@ -1,6 +1,8 @@
 #!/bin/bash
 
-benchmark_bin_path="/root/PMDK-Libs/libpmemobj-cpp/build/benchmarks"
+source ../common.sh
+
+benchmark_bin_path="${pmdk_libpmemobj_cpp_path}/build/benchmarks"
 declare -a benchmark_bin_array=(
 	benchmark-concurrent_hash_map_insert_open
 	benchmark-concurrent_hash_map_insert_open_secure
