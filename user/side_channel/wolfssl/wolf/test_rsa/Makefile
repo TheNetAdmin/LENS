@@ -5,7 +5,10 @@ LIBS=-lwolfssl -lpthread
 rsa_keytest: rsa_keytest.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -Wl,-rpath=/mnt/pmem
 
-.PHONY: clean
+cert:
+	openssl genrsa -out private.pem 2048
+	openssl rsa -in private.pem -out private.der -outform DER
 
+.PHONY: clean
 clean:
 	rm -f *.o rsa_keytest

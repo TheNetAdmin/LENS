@@ -36,7 +36,7 @@ void dump_bigint(mp_int * x, char * label){
 
 
 #define KEY_FILE "private.der"
-#define DER_BLOB_SIZE     609
+#define DER_BLOB_SIZE     1191
 
 int main(int argc, char *argv[])
 {

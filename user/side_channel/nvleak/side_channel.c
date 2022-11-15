@@ -173,7 +173,19 @@ void flush_l2_set(unsigned set_idx, chasing_info_t *ci, iter_result_t *ir)
 uint64_t flush_l1(uint8_t *buf)
 {
 	uint64_t tmp = 0;
-	for (int i = 0; i < (16384 + 16384); i += 256) {
+	for (int i = 0; i < 16384; i += 256) {
+		tmp += (uint64_t)buf[i];
+		// buf[i] = tmp;
+		_mm_clflush(&(buf[i]));
+	}
+	_mm_mfence();
+	return tmp;
+}
+
+uint64_t flush_l1_double(uint8_t *buf)
+{
+	uint64_t tmp = 0;
+	for (int i = 0; i < 32768; i += 256) {
 		tmp += (uint64_t)buf[i];
 		// buf[i] = tmp;
 		_mm_clflush(&(buf[i]));
@@ -319,11 +331,8 @@ static uint8_t side_channel_shared_lib(side_channel_info_t *si)
 			_mm_clflush(&si->lib_data[curr_page * 4096]);
 		}
 		_mm_mfence();
-		
-
 		cycle_iter_beg = rdtscp();
 
-		
 		si->ci->repeat = 1;
 		if (si->probe_lib_page < 0) {
 			for (int curr_page = 0; curr_page < num_lib_pages; curr_page ++) {
@@ -362,7 +371,7 @@ static uint8_t side_channel_shared_lib(side_channel_info_t *si)
 			// flush_l2_set(curr_page + si->cache_set_beg, si->ci, &si->ir[iter]);
 		}
 		_mm_mfence();
-		flush_l1(si->buf);
+		flush_l1_double(si->buf);
 
 		cycle_iter_end = rdtscp();
 

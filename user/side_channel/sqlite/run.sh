@@ -87,7 +87,7 @@ prepare_sqlite() {
 sqlite_bench() {
 	echo "SQLite SQL code file: $1"
 	echo "SQLite DB file: ${sqlite_db_file}"
-	sqlite3 /mnt/pmem/sqlite/${sqlite_db_file} < "sql/$1";
+	sqlite3 /mnt/pmem/sqlite/${sqlite_db_file} < "sql/$1" > /dev/null;
 }
 
 exec_sql_op() {
@@ -141,27 +141,35 @@ exec_sql_op() {
 		sqlite_bench npees_update1.sql.loc.sql
 		;;
 	range1)
+		sleep 0.25
 		sqlite_bench npees_range_date1.sql
 		;;
 	range2)
+		sleep 0.25
 		sqlite_bench npees_range_date2.sql
 		;;
 	range3)
+		sleep 0.25
 		sqlite_bench npees_range_date3.sql
 		;;
 	range4)
+		sleep 0.25
 		sqlite_bench npees_range_date4.sql
 		;;
 	range_month1)
+		sleep 0.25
 		sqlite_bench npees_range_month1.sql
 		;;
 	range_month2)
+		sleep 0.25
 		sqlite_bench npees_range_month2.sql
 		;;
 	range_month3)
+		sleep 0.25
 		sqlite_bench npees_range_month3.sql
 		;;
 	range_month4)
+		sleep 0.25
 		sqlite_bench npees_range_month4.sql
 		;;
 	range_all)
@@ -323,7 +331,7 @@ _run() {
 			prepare_sqlite
 
 			# Run
-			for set_idx in {0..4}; do
+			for set_idx in {0..64}; do
 			{
 				bench_echo "Probing at set [${set_idx}]"
 				{

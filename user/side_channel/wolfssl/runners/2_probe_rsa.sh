@@ -8,7 +8,7 @@ if [ "$pageno" == "none" ] || [ "$offset" == "none" ]; then
 	exit 2
 fi
 
-side_channel_iter=$((1200 * 300))
+side_channel_iter=$((1200 * 600))
 
 function bench_run() {
 	if [ ${side_channel_iter} -ne 0 ]; then
