@@ -327,9 +327,9 @@ static uint8_t side_channel_shared_lib(side_channel_info_t *si)
 	uint8_t tmp = 0;
 
 	for (size_t iter = 0; iter < si->iters; iter ++) {
-		for (int curr_page = 0; curr_page < num_lib_pages; curr_page ++) {
-			_mm_clflush(&si->lib_data[curr_page * 4096]);
-		}
+		// for (int curr_page = 0; curr_page < num_lib_pages; curr_page ++) {
+		// 	_mm_clflush(&si->lib_data[curr_page * 4096]);
+		// }
 		_mm_mfence();
 		cycle_iter_beg = rdtscp();
 
@@ -371,7 +371,7 @@ static uint8_t side_channel_shared_lib(side_channel_info_t *si)
 			// flush_l2_set(curr_page + si->cache_set_beg, si->ci, &si->ir[iter]);
 		}
 		_mm_mfence();
-		flush_l1_double(si->buf);
+		flush_l1(si->buf);
 
 		cycle_iter_end = rdtscp();
 

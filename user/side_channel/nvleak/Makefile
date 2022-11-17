@@ -1,7 +1,7 @@
 
 .DEFAULT_GOAL := side_channel
 
-CFLAGS += -march=native -g -O0
+CFLAGS += -march=native
 
 headers = chasing_config.h chasing.h print_info.h utils.h
 
