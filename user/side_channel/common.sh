@@ -4,12 +4,13 @@ source ../../../scripts/utils/check_mtrr.sh
 check_mtrr cacheable
 
 export host_name=$(hostname | tr -d "[:space:]")
+PROJ_ROOT=${PROJ_ROOT:-/home/usenix/}
 
 case "${host_name}" in
 	nv-4)
 		export dram_dev="${dram_dev:-/dev/pmem0}"
 		export pmem_dev="${pmem_dev:-/dev/pmem1}"
-		export nvleak_path="/home/usenix/NVLeak/nvleak"
+		export nvleak_path="$PROJ_ROOT/NVLeak/nvleak"
 		export pmdk_libpmemobj_cpp_path="${nvleak_path}/user/side_channel/libpmemobj-cpp"
 		dax_attacker=$(ndctl list | jq '.[] | select(.name=="dax-attacker") | .chardev' | tr -d '"')
 		[ -z "${dax_attacker}" ] && dax_attacker="dax_dev_not_found"

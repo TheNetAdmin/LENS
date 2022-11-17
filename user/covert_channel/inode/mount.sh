@@ -3,7 +3,9 @@
 set -e
 set -x
 
-e2fs="/home/usenix/e2fsprogs-1.46.4/build/misc/mke2fs" # Used on nv-4
+PROJ_ROOT=${PROJ_ROOT:-/home/usenix/}
+
+e2fs="$PROJ_ROOT/e2fsprogs-1.46.4/build/misc/mke2fs" # Used on nv-4
 
 fs=ext4
 
