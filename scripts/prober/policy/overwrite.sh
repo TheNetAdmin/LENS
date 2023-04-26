@@ -35,7 +35,7 @@ echo $lens_arg >/proc/lens
 
 while true; do
     sleep 10
-    q=$(dmesg | tail -n 50 | grep "${task_name}_END")
+    q=$(dmesg | grep "${task_name}_END")
     if [[ $q ]]; then
         break
     fi

@@ -1,0 +1,3 @@
+wolf/**/*.o
+wolf/test_dsa/dsa_sign
+wolf/test_rsa/rsa_keytest

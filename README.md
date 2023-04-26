@@ -4,6 +4,8 @@ LENS is a low-level non-volatile memory profiler, which is built based on [LATTe
 
 LENS is part of our [MICRO 2020 paper](https://github.com/TheNetAdmin/LENS-VANS).
 
+Based on LENS we developed NVLeak, which si part of our [USENIX Security 2023 paper](https://github.com/TheNetAdmin/NVLeak)
+
 ## Introduction
 
 LENS contains two modules, each of them needs to be mounted on a pmem device (in fsdax mode):
@@ -60,7 +62,7 @@ $ pip3 install click numpy
 An example to parse `pointer_chasing.sh` results:
 
 ```shell
-$ python3 scripts/prober/buffer/parse.py pointer_chasing \
+$ python3 scripts/prober/buffer/parse.py pointer-chasing \
           --src_file results/your_task_id/stdout.log \
           --out_file pointer_chasing.csv
 ```
@@ -131,7 +133,7 @@ Options:
         [write_size|z]     For Straight Write: access size, default=0
         [fence_rate|f]     Access size before issuing a sfence instruction
         [clwb_rate|c]      Access size before issuing a clwb instruction
-        [probe_count|r]    Number of test rounds
+        [repeat|r]    Number of test rounds
         [message|m]        A string as a unique ID for the current job
 
 Available pointer chasing benchmarks:
@@ -176,13 +178,20 @@ CPU mitigations | Off
 ## Bibliography
 
 ```bibtex
-@inproceedings{LENS-VANS,
+@inproceedings{Wang2020LensVans,
   author={Zixuan Wang and Xiao Liu and Jian Yang and Theodore Michailidis and Steven Swanson and Jishen Zhao},
   booktitle={2020 53rd Annual IEEE/ACM International Symposium on Microarchitecture (MICRO)}, 
   title={Characterizing and Modeling Non-Volatile Memory Systems}, 
   year={2020},
   pages={496-508},
   doi={10.1109/MICRO50266.2020.00049}
+}
+
+@inproceedings{Wang2023NVLeak,
+  title     = {{NVLeak}: Off-Chip Side-Channel Attacks via Non-Volatile Memory Systems},
+  author    = {Zixuan Wang and Mohammadkazem Taram and Daniel Moghimi and Steven Swanson and Dean Tullsen and Jishen Zhao},
+  booktitle = {32nd {USENIX} Security Symposium ({USENIX} Security 23)},
+  year      = {2023}
 }
 ```
 

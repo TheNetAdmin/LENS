@@ -1,0 +1,10 @@
+SELECT
+        trackid,
+        name,
+        composer,
+        unitprice
+FROM
+        tracks
+WHERE
+        trackid=1
+;

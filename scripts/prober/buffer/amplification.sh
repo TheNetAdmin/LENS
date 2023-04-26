@@ -39,7 +39,7 @@ for block_size in ${block_array[@]}; do
 
         while true; do
             sleep 5
-            q=$(dmesg | tail -n 50 | grep "${task_name}_END: $region_size-$block_size")
+            q=$(dmesg | grep "${task_name}_END: $region_size-$block_size")
             if [[ $q ]]; then
                 break
             fi

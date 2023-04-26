@@ -1,9 +1,9 @@
-#!/bin/sh
-umount /mnt/latency
-umount /mnt/report
+#!/bin/bash
 
+sudo umount /mnt/latency
+sudo umount /mnt/report
 
-rmmod latfs
-rmmod repfs
+sudo rmmod latfs
+sudo rmmod repfs
 
-echo 1 > /proc/sys/kernel/soft_watchdog
+sudo bash -c "echo 1 > /proc/sys/kernel/soft_watchdog"

@@ -38,16 +38,25 @@ static const struct latency_option lattest_opts[] =
 	{"message",        OPT_STRING, 'm'},
 	{"access_size",    OPT_INT,    'a'},
 	{"stride_size",    OPT_INT,    's'},
+	{"pc_region_align",OPT_INT,    'A'},
 	{"pc_region_size", OPT_INT,    'R'},
 	{"pc_block_size",  OPT_INT,    'B'},
 	{"bwsize_bit",     OPT_INT,    'b'},
 	{"delay",          OPT_INT,    'd'},
+	{"delay_per_byte", OPT_INT,    'e'},
 	{"write_start",    OPT_INT,    'w'},
 	{"write_size",     OPT_INT,    'z'},
 	{"align_mode",     OPT_INT,    'l'},
+	{"align_size",     OPT_INT,    'i'},
 	{"fence_rate",     OPT_INT,    'f'},
 	{"clwb_rate",      OPT_INT,    'c'},
-	{"probe_count",    OPT_INT,    'r'},
+	{"repeat",         OPT_INT,    'r'},
+	{"count",          OPT_INT,    'C'},
+	{"sync",           OPT_INT,    'y'},
+	{"sync_per_iter",  OPT_INT,    'Y'},
+	{"threshold_cycle",OPT_INT,    'H'},
+	{"threshold_iter" ,OPT_INT,    'I'},
+	{"warm_up"        ,OPT_INT,    'W'},
 	{NULL,             0,            0}
 };
 
@@ -64,31 +73,42 @@ void latencyfs_parse_cmd(struct latency_sbi *sbi, char *cmd)
 	/* Default args */
 	sbi->op		    = 0;
 	sbi->access_size    = 64;
-	sbi->strided_size   = 64;
+	sbi->strided_size   = 64; /* TODO: convert to "stride_size" */
+	sbi->pc_region_align= 64;
 	sbi->pc_region_size = 64;
 	sbi->pc_block_size  = 64;
 	sbi->runtime	    = 10;
 	sbi->bwsize_bit	    = 6;
 	sbi->delay	    = 0;
+	sbi->delay_per_byte = 0;
 	sbi->write_start    = 0;
 	sbi->write_size	    = 64;
 	sbi->clwb_rate	    = 64;
 	sbi->fence_rate	    = 64;
-	sbi->probe_count    = LATENCY_OPS_COUNT;
-	sbi->align	    = ALIGN_PERTHREAD;
+	sbi->repeat	    = 1;
+	sbi->count	    = 1;
+	sbi->sync	    = 1;
+	sbi->sync_per_iter  = 1;
+	sbi->threshold_cycle= 0;
+	sbi->threshold_iter = 0;
+	sbi->align_mode	    = ALIGN_PERTHREAD;
+	sbi->align_size	    = PERTHREAD_WORKSET;
+	sbi->task           = -1;
+	sbi->warm_up        = 0;
 
 	while ((op = latencyfs_getopt("lens", &cmd, lattest_opts, NULL,
 				      &optarg, &optint)) != 0) {
 		switch (op) {
 		case 'T':
-			if (optint > 0 && optint < TASK_COUNT)
-				task = optint;
-			else
-				pr_info("Ignore parameter: task = %ld\n",
-					optint);
+			if (optint > 0 && optint < TASK_COUNT) {
+				task      = optint;
+				sbi->task = optint;
+			} else {
+				pr_info("Ignore parameter: task = %ld\n", optint);
+			}
 			break;
 		case 'o':
-			if (optint >= 0 && optint < 4)
+			if (optint >= 0)
 				sbi->op = optint;
 			else
 				pr_info("Ignore parameter: op = %ld\n", optint);
@@ -124,6 +144,13 @@ void latencyfs_parse_cmd(struct latency_sbi *sbi, char *cmd)
 				pr_info("Ignore parameter: stride_size = %ld\n",
 					optint);
 			break;
+		case 'A':
+			if (optint >= 0 && optint <= LFS_ACCESS_MAX)
+				sbi->pc_region_align = optint;
+			else
+				pr_info("Ignore parameter: pc_region_align = %ld\n",
+					optint);
+			break;
 		case 'R':
 			if (optint >= 0 && optint <= LFS_ACCESS_MAX)
 				sbi->pc_region_size = optint;
@@ -150,7 +177,14 @@ void latencyfs_parse_cmd(struct latency_sbi *sbi, char *cmd)
 			if (optint > 0 && optint <= LFS_DELAY_MAX)
 				sbi->delay = optint;
 			else
-				pr_info("Ignore parameter: delay = %ld\n",
+				pr_info("Ignore parameter: delay = %lu\n",
+					optint);
+			break;
+		case 'e':
+			if (optint > 0 && optint <= LFS_ACCESS_MAX)
+				sbi->delay_per_byte = optint;
+			else
+				pr_info("Ignore parameter: delay_per_byte = %ld\n",
 					optint);
 			break;
 		case 'w':
@@ -169,9 +203,16 @@ void latencyfs_parse_cmd(struct latency_sbi *sbi, char *cmd)
 			break;
 		case 'l':
 			if (optint >= 0 && optint < ALIGN_INVALID)
-				sbi->align = optint;
+				sbi->align_mode = optint;
 			else
 				pr_info("Ignore parameter: align_mode = %ld\n",
+					optint);
+			break;
+		case 'i':
+			if (optint >= 0 && optint < DIMM_SIZE)
+				sbi->align_size = optint;
+			else
+				pr_info("Ignore parameter: align_size = %lu\n",
 					optint);
 			break;
 		case 'f':
@@ -190,11 +231,47 @@ void latencyfs_parse_cmd(struct latency_sbi *sbi, char *cmd)
 			break;
 		case 'r':
 			// 64GB (access size is 28)
-			if (optint > 0 && optint <= (1ULL << 28))
-				sbi->probe_count = optint;
+			if (optint >= 0 && optint <= (1ULL << 28))
+				sbi->repeat = optint;
 			else
-				pr_info("Ignore parameter: probe_count = %ld\n",
+				pr_info("Ignore parameter: repeat = %ld\n",
 					optint);
+			break;
+		case 'C':
+			if (optint > 0 && optint <= (1ULL << 28))
+				sbi->count = optint;
+			else
+				pr_info("Ignore parameter: count = %ld\n",
+					optint);
+			break;
+		case 'y':
+			if (optint >= 0 && optint <= 1)
+				sbi->sync = optint;
+			else
+				pr_info("Ignore parameter: sync = %ld\n",
+					optint);
+			break;
+		case 'Y':
+			if (optint >= 0 && optint <= 1)
+				sbi->sync_per_iter = optint;
+			else
+				pr_info("Ignore parameter: sync_per_iter = %ld\n",
+					optint);
+			if (sbi->sync_per_iter == 1) {
+				pr_info("Disabling sync per iteration\n");
+			}
+			break;
+		case 'H':
+			sbi->threshold_cycle = optint;
+			break;
+		case 'I':
+			sbi->threshold_iter = optint;
+			break;
+		case 'W':
+			if (optint == 0 || optint == 1)
+				sbi->warm_up = optint;
+			else
+				pr_info("Ignore parameter: warm_up = %ld shoud be 0 or 1", optint);
 			break;
 		default:
 			pr_info("unknown opt %s\n", optarg);
@@ -239,6 +316,32 @@ void latencyfs_parse_cmd(struct latency_sbi *sbi, char *cmd)
 	if (task == TASK_SIZE_BW) {
 		if (!sbi->bwsize_bit) {
 			pr_info("SizeBW task requires bwsize_bit.\n");
+			ret = -EINVAL;
+			goto out;
+		}
+	}
+
+	if (task == TASK_BUFFER_COVERT_CHANNEL) {
+		if (!sbi->align_size) {
+			pr_info("Buffer covert channel task requires align_size.\n");
+			ret = -EINVAL;
+			goto out;
+		}
+	}
+
+	if (task == TASK_PC_READ_AFTER_WRITE ||
+	    task == TASK_PC_READ_AND_WRITE || task == TASK_PC_WRITE) {
+		if (sbi->op != 0) {
+			/* TODO: Modify tasks.c to support back and forth */
+			pr_info("Error: op must be 0 or 1, but op=1 is not yet implemented.\n");
+			ret = -EINVAL;
+			goto out;
+		}
+	}
+
+	if (task == TASK_PC_STRIDED) {
+		if (sbi->op < 0 || sbi->op > 5) {
+			pr_info("Error: op must be 0 to 5.\n");
 			ret = -EINVAL;
 			goto out;
 		}

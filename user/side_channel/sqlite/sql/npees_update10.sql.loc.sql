@@ -1,0 +1,10 @@
+update location set city = "123123123 2" where npi == 123123123;
+update location set city = "123123124 2" where npi == 123123124;
+update location set city = "123123125 2" where npi == 123123125;
+update location set city = "123123126 2" where npi == 123123126;
+update location set city = "123123127 2" where npi == 123123127;
+update location set city = "123123128 2" where npi == 123123128;
+update location set city = "123123129 2" where npi == 123123129;
+update location set city = "123123130 2" where npi == 123123130;
+update location set city = "123123131 2" where npi == 123123131;
+update location set city = "123123132 2" where npi == 123123132;

@@ -10,9 +10,12 @@ print_help() {
 }
 
 sigint_handler() {
-    echo '$0: SIGINT received, cleaning...'
-    kill -2 $(jobs -p)
-    wait
+    echo "$0: SIGINT received, cleaning..."
+    if [ -n "$(jobs -p)" ]; then
+        kill -2 $(jobs -p)
+        wait
+    fi
+    exit 1
 }
 
 trap sigint_handler SIGINT
@@ -26,7 +29,7 @@ export rep_dev=$1
 export test_dev=$2
 job_script=$3
 shift 3
-job_arguments=$@
+job_arguments=$*
 
 if [ ! -f $job_script ]; then
     echo Job script not found: $job_script
@@ -42,7 +45,7 @@ echo
 echo "Press any key to start, or Ctrl-C to exit..."
 read
 
-script_path=$(realpath $(dirname $0))
+export script_path=$(realpath $(dirname $0))
 
 echo "Compiling source and mount LENS"
 $script_path/utils/mount.sh $rep_dev $test_dev

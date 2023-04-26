@@ -16,17 +16,17 @@
  */
 
 #include "chasing.h"
-#include <linux/string.h>
+#include <string.h>
 
 void chasing_print_help(void)
 {
 	int len = sizeof(chasing_func_list) / sizeof(chasing_func_entry_t);
 	int i;
 
-	printk("Available pointer chasing benchmarks: \n");
-	printk("\tNo.\tName\t\t\tBlock Size (Byte)\n");
+	printf("Available pointer chasing benchmarks: \n");
+	printf("\tNo.\tName\t\t\tBlock Size (Byte)\n");
 	for (i = 0; i < len; i++)
-		printk("\t%d\t%s\t%lu\n", i, chasing_func_list[i].name,
+		printf("\t%d\t%s\t%lu\n", i, chasing_func_list[i].name,
 		       chasing_func_list[i].block_size);
 }
 
@@ -34,7 +34,7 @@ void chasing_print_help(void)
  * Find index of a pointer chasing function according to block_size
  * Return -1 if not found
  */
-int chasing_find_func(unsigned long block_size)
+int chasing_find_func(uint64_t block_size)
 {
 	int ret = -1;
 	int i;
@@ -56,7 +56,7 @@ int chasing_find_func(unsigned long block_size)
  * Generate random number to [rd] within range [0 - range).
  * Return 0 if success, 1 if fail.
  */
-inline int get_rand(uint64_t *rd, uint64_t range)
+static inline int get_rand(uint64_t *rd, uint64_t range)
 {
 	uint8_t ok;
 	int i = 0;
@@ -102,4 +102,27 @@ int init_chasing_index(uint64_t *cindex, uint64_t csize)
 	}
 
 	return 0;
+}
+
+void print_chasing_index(uint64_t *cindex, uint64_t csize)
+{
+	uint64_t cols = 8;
+	uint64_t i, j;
+
+	printf("%6s:", "row");
+	for (i = 0; i < cols; i++) {
+		printf(" %6lu", i);
+	}
+	printf("\n");
+
+	for (j = 0; j * cols < csize; j++) {
+		printf("%6lu:", j);
+		for (i = 0; i < cols; i++) {
+			if ((j * cols + i) > csize) {
+				break;
+			}
+			printf(" %6lu", cindex[j * cols + i]);
+		}
+		printf("\n");
+	}
 }

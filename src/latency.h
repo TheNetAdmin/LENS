@@ -36,7 +36,7 @@
 /*
  * 64-byte benchmarks
  */
-uint64_t store_64byte_fence(char *addr) {
+static uint64_t store_64byte_fence(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -56,7 +56,7 @@ uint64_t store_64byte_fence(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_64byte_clflush(char *addr) {
+static uint64_t store_64byte_clflush(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -76,7 +76,7 @@ uint64_t store_64byte_clflush(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_64byte_clwb(char *addr) {
+static uint64_t store_64byte_clwb(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -96,7 +96,7 @@ uint64_t store_64byte_clwb(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_64byte_clflushopt(char *addr) {
+static uint64_t store_64byte_clflushopt(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -116,7 +116,7 @@ uint64_t store_64byte_clflushopt(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t nstore_64byte_fence(char *addr) {
+static uint64_t nstore_64byte_fence(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -139,7 +139,7 @@ uint64_t nstore_64byte_fence(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t load_64byte_fence(char *addr) {
+static uint64_t load_64byte_fence(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -156,7 +156,7 @@ uint64_t load_64byte_fence(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t load_64byte_fence_nt(char *addr) {
+static uint64_t load_64byte_fence_nt(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	/*
 	 * Requires avx2
@@ -178,7 +178,7 @@ uint64_t load_64byte_fence_nt(char *addr) {
 }
 
 
-uint64_t baseline(char *addr) {
+static uint64_t baseline(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(CLEAR_PIPELINE
@@ -190,7 +190,7 @@ uint64_t baseline(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_64byte_fence_movq(char *addr) {
+static uint64_t store_64byte_fence_movq(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -213,7 +213,7 @@ uint64_t store_64byte_fence_movq(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_64byte_clflush_movq(char *addr) {
+static uint64_t store_64byte_clflush_movq(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -237,7 +237,7 @@ uint64_t store_64byte_clflush_movq(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t load_64byte_fence_movq(char *addr) {
+static uint64_t load_64byte_fence_movq(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -260,7 +260,7 @@ uint64_t load_64byte_fence_movq(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t(*latency_funcs_64byte[])(char *) = {
+static uint64_t(*latency_funcs_64byte[])(char *) = {
 	&load_64byte_fence, // load + fence
 	&load_64byte_fence_nt, // non-temporal load + fence
 	&store_64byte_fence, // store + fence
@@ -277,7 +277,7 @@ uint64_t(*latency_funcs_64byte[])(char *) = {
 /*
  * 128-byte benchmarks
  */
-uint64_t store_128byte_fence(char *addr) {
+static uint64_t store_128byte_fence(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -298,7 +298,7 @@ uint64_t store_128byte_fence(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_128byte_clflush(char *addr) {
+static uint64_t store_128byte_clflush(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -321,7 +321,7 @@ uint64_t store_128byte_clflush(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_128byte_clwb(char *addr) {
+static uint64_t store_128byte_clwb(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -344,7 +344,7 @@ uint64_t store_128byte_clwb(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_128byte_clflushopt(char *addr) {
+static uint64_t store_128byte_clflushopt(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -367,7 +367,7 @@ uint64_t store_128byte_clflushopt(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t nstore_128byte_fence(char *addr) {
+static uint64_t nstore_128byte_fence(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -388,7 +388,7 @@ uint64_t nstore_128byte_fence(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t load_128byte_fence(char *addr) {
+static uint64_t load_128byte_fence(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -407,7 +407,7 @@ uint64_t load_128byte_fence(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t load_128byte_fence_nt(char *addr) {
+static uint64_t load_128byte_fence_nt(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -426,7 +426,7 @@ uint64_t load_128byte_fence_nt(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_128byte_fence_movq(char *addr) {
+static uint64_t store_128byte_fence_movq(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -457,7 +457,7 @@ uint64_t store_128byte_fence_movq(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_128byte_clflush_movq(char *addr) {
+static uint64_t store_128byte_clflush_movq(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -490,7 +490,7 @@ uint64_t store_128byte_clflush_movq(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t load_128byte_fence_movq(char *addr) {
+static uint64_t load_128byte_fence_movq(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -521,7 +521,7 @@ uint64_t load_128byte_fence_movq(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t(*latency_funcs_128byte[])(char *) = {
+static uint64_t(*latency_funcs_128byte[])(char *) = {
 	&load_128byte_fence,
 	&load_128byte_fence_nt,
 	&store_128byte_fence,
@@ -538,7 +538,7 @@ uint64_t(*latency_funcs_128byte[])(char *) = {
 /*
  * 256-byte benchmarks
  */
-uint64_t store_256byte_fence(char *addr) {
+static uint64_t store_256byte_fence(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -565,7 +565,7 @@ uint64_t store_256byte_fence(char *addr) {
 
 
 
-uint64_t store_256byte_clflush(char *addr) {
+static uint64_t store_256byte_clflush(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -594,7 +594,7 @@ uint64_t store_256byte_clflush(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_256byte_clwb(char *addr) {
+static uint64_t store_256byte_clwb(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -623,7 +623,7 @@ uint64_t store_256byte_clwb(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_256byte_clflushopt(char *addr) {
+static uint64_t store_256byte_clflushopt(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -652,7 +652,7 @@ uint64_t store_256byte_clflushopt(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t nstore_256byte_fence(char *addr) {
+static uint64_t nstore_256byte_fence(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
@@ -677,7 +677,7 @@ uint64_t nstore_256byte_fence(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t load_256byte_fence(char *addr) {
+static uint64_t load_256byte_fence(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -700,7 +700,7 @@ uint64_t load_256byte_fence(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t load_256byte_fence_nt(char *addr) {
+static uint64_t load_256byte_fence_nt(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -723,7 +723,7 @@ uint64_t load_256byte_fence_nt(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_256byte_fence_movq(char *addr) {
+static uint64_t store_256byte_fence_movq(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -770,7 +770,7 @@ uint64_t store_256byte_fence_movq(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t store_256byte_clflush_movq(char *addr) {
+static uint64_t store_256byte_clflush_movq(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -821,7 +821,7 @@ uint64_t store_256byte_clflush_movq(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t load_256byte_fence_movq(char *addr) {
+static uint64_t load_256byte_fence_movq(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	KERNEL_BEGIN
 	asm volatile(LOAD_ADDR
@@ -868,7 +868,7 @@ uint64_t load_256byte_fence_movq(char *addr) {
 	return t2 - t1;
 }
 
-uint64_t(*latency_funcs_256byte[])(char *) = {
+static uint64_t(*latency_funcs_256byte[])(char *) = {
 	&load_256byte_fence,
 	&load_256byte_fence_nt,
 	&store_256byte_fence,
@@ -883,7 +883,7 @@ uint64_t(*latency_funcs_256byte[])(char *) = {
 };
 
 // Benchmark functions map
-const char *latency_bench_map[] = {
+static const char *latency_bench_map[] = {
 	"load-fence",
 	"ntload-fence",
 	"store-fence",
@@ -1027,7 +1027,7 @@ static const char *latency_tasks_str[BASIC_OPS_TASK_COUNT] = {
 };
 
 
-uint64_t (*bench_func[BASIC_OPS_TASK_COUNT])(char *) = {
+static uint64_t (*bench_func[BASIC_OPS_TASK_COUNT])(char *) = {
 	&load_64byte_fence,
 	&load_64byte_fence_nt,
 	&store_64byte_fence,
@@ -1075,53 +1075,153 @@ uint64_t (*bench_func[BASIC_OPS_TASK_COUNT])(char *) = {
 /*
  * 256-byte benchmarks
  */
-uint64_t repeat_256byte_ntstore(char *addr) {
+static uint64_t repeat_256byte_ntstore(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
-	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
-	asm volatile(LOAD_VALUE
+	asm volatile(
 		LOAD_ADDR
 		TIMING_BEG
-		"vmovntpd %%ymm0, 0*32(%%rsi) \n"
-		"vmovntpd %%ymm0, 1*32(%%rsi) \n"
-		"vmovntpd %%ymm0, 2*32(%%rsi) \n"
-		"vmovntpd %%ymm0, 3*32(%%rsi) \n"
-		"vmovntpd %%ymm0, 4*32(%%rsi) \n"
-		"vmovntpd %%ymm0, 5*32(%%rsi) \n"
-		"vmovntpd %%ymm0, 6*32(%%rsi) \n"
-		"vmovntpd %%ymm0, 7*32(%%rsi) \n"
+		"vmovq    %%r9,   %%xmm0 \n"
+		"vmovntpd %%zmm0, 0*64(%%rsi) \n"
+		"vmovntpd %%zmm0, 1*64(%%rsi) \n"
+		"vmovntpd %%zmm0, 2*64(%%rsi) \n"
+		"vmovntpd %%zmm0, 3*64(%%rsi) \n"
 		TIMING_END
 		: [t1] "=r" (t1), [t2] "=r" (t2)
-		: [memarea] "r" (addr), [value] "m" (value)
-		: REGISTERS);
+		: [memarea] "r" (addr)
+		: REGISTERS, "zmm0");
 	KERNEL_END
 	return t2 - t1;
 }
 
+static uint64_t repeat_256byte_clwb(char *addr) {
+	uint64_t t1 = 0, t2 = 0;
+	KERNEL_BEGIN
+	asm volatile(
+		LOAD_ADDR
+		TIMING_BEG
+		"mov %%r9, 0*64(%%rsi) \n"
+		"mov %%r9, 1*64(%%rsi) \n"
+		"mov %%r9, 2*64(%%rsi) \n"
+		"mov %%r9, 3*64(%%rsi) \n"
+		"clwb      0*64(%%rsi) \n"
+		"clwb      1*64(%%rsi) \n"
+		"clwb      2*64(%%rsi) \n"
+		"clwb      3*64(%%rsi) \n"
+		TIMING_END
+		: [t1] "=r" (t1), [t2] "=r" (t2)
+		: [memarea] "r" (addr)
+		: REGISTERS, "zmm0");
+	KERNEL_END
+	return t2 - t1;
+}
 
+static uint64_t repeat_64byte_ntstore(char *addr) {
+	uint64_t t1 = 0, t2 = 0;
+	KERNEL_BEGIN
+	asm volatile(
+		LOAD_ADDR
+		TIMING_BEG
+		"vmovq    %%r9,   %%xmm0 \n"
+		"vmovntpd %%zmm0, 0*64(%%rsi) \n"
+		TIMING_END
+		: [t1] "=r" (t1), [t2] "=r" (t2)
+		: [memarea] "r" (addr)
+		: REGISTERS, "zmm0");
+	KERNEL_END
+	return t2 - t1;
+}
+
+/*
+ * 256-byte benchmarks, return a beg:end timing pair
+ */
+static latency_timing_pair repeat_256byte_ntstore_pair(char *addr) {
+	uint64_t t1 = 0, t2 = 0;
+	latency_timing_pair ret;
+	KERNEL_BEGIN
+	asm volatile(
+		LOAD_ADDR
+		TIMING_BEG
+		"vmovq    %%r9,   %%xmm0 \n"
+		"vmovntpd %%zmm0, 0*64(%%rsi) \n"
+		"vmovntpd %%zmm0, 1*64(%%rsi) \n"
+		"vmovntpd %%zmm0, 2*64(%%rsi) \n"
+		"vmovntpd %%zmm0, 3*64(%%rsi) \n"
+		TIMING_END
+		: [t1] "=r" (t1), [t2] "=r" (t2)
+		: [memarea] "r" (addr)
+		: REGISTERS, "zmm0");
+	KERNEL_END
+	ret.beg = t1;
+	ret.end = t2;
+	return ret;
+}
+
+static latency_timing_pair repeat_256byte_clwb_pair(char *addr) {
+	uint64_t t1 = 0, t2 = 0;
+	latency_timing_pair ret;
+	KERNEL_BEGIN
+	asm volatile(
+		LOAD_ADDR
+		TIMING_BEG
+		"mov %%r9, 0*64(%%rsi) \n"
+		"mov %%r9, 1*64(%%rsi) \n"
+		"mov %%r9, 2*64(%%rsi) \n"
+		"mov %%r9, 3*64(%%rsi) \n"
+		"clwb      0*64(%%rsi) \n"
+		"clwb      1*64(%%rsi) \n"
+		"clwb      2*64(%%rsi) \n"
+		"clwb      3*64(%%rsi) \n"
+		TIMING_END
+		: [t1] "=r" (t1), [t2] "=r" (t2)
+		: [memarea] "r" (addr)
+		: REGISTERS, "zmm0");
+	KERNEL_END
+	ret.beg = t1;
+	ret.end = t2;
+	return ret;
+}
+
+static latency_timing_pair repeat_256byte_ntstore_pair_cpuid(char *addr) {
+	uint64_t t1 = 0, t2 = 0;
+	latency_timing_pair ret;
+	KERNEL_BEGIN
+	asm volatile(
+		LOAD_ADDR
+		TIMING_BEG
+		"vmovq    %%r9,   %%xmm0 \n"
+		"vmovntpd %%zmm0, 0*64(%%rsi) \n"
+		"vmovntpd %%zmm0, 1*64(%%rsi) \n"
+		"vmovntpd %%zmm0, 2*64(%%rsi) \n"
+		"vmovntpd %%zmm0, 3*64(%%rsi) \n"
+		TIMING_END_CPUID
+		: [t1] "=r" (t1), [t2] "=r" (t2)
+		: [memarea] "r" (addr)
+		: REGISTERS, "rbx", "zmm0");
+	KERNEL_END
+	ret.beg = t1;
+	ret.end = t2;
+	return ret;
+}
 
 /*
  * 256-byte benchmarks
  */
-uint64_t repeat_256byte_load(char *addr) {
+static uint64_t repeat_256byte_load(char *addr) {
 	uint64_t t1 = 0, t2 = 0;
 	uint64_t value = 0xC0FFEEEEBABE0000;
 	KERNEL_BEGIN
-	asm volatile(LOAD_VALUE
+	asm volatile(
 		LOAD_ADDR
 		TIMING_BEG
-		"vmovntdqa 0*32(%%rsi), %%ymm0 \n"
-		"vmovntdqa 1*32(%%rsi), %%ymm1 \n"
-		"vmovntdqa 2*32(%%rsi), %%ymm2 \n"
-		"vmovntdqa 3*32(%%rsi), %%ymm3 \n"
-		"vmovntdqa 4*32(%%rsi), %%ymm4 \n"
-		"vmovntdqa 5*32(%%rsi), %%ymm5 \n"
-		"vmovntdqa 6*32(%%rsi), %%ymm6 \n"
-		"vmovntdqa 7*32(%%rsi), %%ymm7 \n"
+		"vmovntdqa 0*64(%%rsi), %%zmm0 \n"
+		"vmovntdqa 1*64(%%rsi), %%zmm1 \n"
+		"vmovntdqa 2*64(%%rsi), %%zmm2 \n"
+		"vmovntdqa 3*64(%%rsi), %%zmm3 \n"
 		TIMING_END
 		: [t1] "=r" (t1), [t2] "=r" (t2)
 		: [memarea] "r" (addr), [value] "m" (value)
-		: REGISTERS);
+		: REGISTERS, "zmm0");
 	KERNEL_END
 	return t2 - t1;
 }

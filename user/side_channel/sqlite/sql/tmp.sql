@@ -1,0 +1,1 @@
+insert into basic values (123123123, 'name 0', 'legal 0'),(123123124, 'name 1', 'legal 1'),(123123125, 'name 2', 'legal 2');

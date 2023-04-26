@@ -57,8 +57,8 @@ else
 fi
 
 echo Test region sizes: "${region_array[@]}"
-echo Test block sizes: "${block_array[@]}"
-echo Test op index: $op
+echo Test block sizes:  "${block_array[@]}"
+echo Test op index:     "$op"
 
 for block_size in ${block_array[@]}; do
     for region_size in ${region_array[@]}; do
@@ -74,15 +74,15 @@ for block_size in ${block_array[@]}; do
 
         if [ $Slack -ne 0 ]; then
             source $(realpath $(dirname $0))/../../utils/slack.sh
-            slack_notice $SlackURL "[$msg] Start"
+            slack_notice_msg "[$msg] Start"
         fi
 
-        echo $lens_arg
-        echo $lens_arg >/proc/lens
+        echo "$lens_arg"
+        echo "$lens_arg" >/proc/lens
 
         while true; do
             sleep 5
-            q=$(dmesg | tail -n 50 | grep "${task_name}_END: $region_size-$block_size")
+            q=$(dmesg | grep "${task_name}_END: $region_size-$block_size")
             if [[ $q ]]; then
                 break
             fi
@@ -94,7 +94,7 @@ for block_size in ${block_array[@]}; do
         dmesg | sed -n "$msg_start,$msg_end" | grep "average"
 
         if [ $Slack -ne 0 ]; then
-            slack_notice $SlackURL "[$msg] End"
+            slack_notice_msg "[$msg] End"
         fi
     done
 done

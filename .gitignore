@@ -1,9 +1,28 @@
+user/inode_covert/inode_covert
+user/inode_covert/AEPWatch.csv
+user/side_channel/src/side_channel
+user/side_channel/results/*
+*.ur-safe
+*.cache.mk
+*.o.S
+*.disasm.c
+.kernel_api_check/
+src/comp_utils/
+
+# Temperory files
+tmp/*
+logs/**
+
+# Disassembly files
+src/*.S
+src/*.disasm.*
 
 # Binary files
 src/debug
 
 # Output files
 results/*
+user/inode_covert/results/*
 
 # Created by https://www.gitignore.io/api/c,c++,python,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=c,c++,python,visualstudiocode
@@ -97,7 +116,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/

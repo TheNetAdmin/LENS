@@ -49,7 +49,7 @@ for accesssize in ${access_array[@]}; do
         echo $lens_arg >/proc/lens
 
         while true; do
-            x=$(dmesg | tail -n 50 | grep "${task_name}_END: $accesssize-$stridesize")
+            x=$(dmesg | grep "${task_name}_END: $accesssize-$stridesize")
             if [[ $x ]]; then
                 break
             fi
