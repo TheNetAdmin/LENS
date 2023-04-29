@@ -43,7 +43,6 @@
 #include <linux/version.h>
 
 #include "lat.h"
-#include "comp_utils/dax_check.h"
 
 int support_clwb = 0;
 static struct report_sbi *g_report_sbi = NULL;

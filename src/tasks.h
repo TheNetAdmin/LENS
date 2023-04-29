@@ -24,6 +24,7 @@
 #include <asm/fpu/api.h>
 #include <linux/kthread.h>
 #include <asm/set_memory.h>
+#include <asm/io.h>
 #include <linux/string.h>
 #include "lat.h"
 #include "memaccess.h"
@@ -37,6 +38,7 @@
 // #include "lib/pqueue.h"
 // #include "lib/pqueue-int.h"
 #include <linux/utsname.h>
+#include "comp_utils/timespec.h"
 
 #ifdef USE_PERF
 #include "perf_util.h"

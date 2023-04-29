@@ -4,6 +4,7 @@
 #include <linux/kernel.h>
 #include <linux/time.h>
 #include <asm/fpu/api.h>
+#include "comp_utils/timespec.h"
 
 #ifndef kr_info
 #define kr_info(string, args...)                                               \
@@ -38,18 +39,18 @@ static inline uint64_t rdtscp_lfence(void)
 }
 
 #define PC_VARS                                                                \
-	struct timespec tstart, tend;                                          \
+	LENS_TIMESPEC tstart, tend;                                            \
 	uint64_t	c_st_beg, c_ld_beg, c_ld_end;
 
 #define PC_BEFORE_WRITE                                                        \
-	getrawmonotonic(&tstart);                                              \
+	LENS_GET_RAW_TS(&tstart);                                              \
 	c_st_beg = rdtscp_lfence();
 
 #define PC_BEFORE_READ c_ld_beg = rdtscp_lfence();
 
 #define PC_AFTER_READ                                                          \
 	c_ld_end = rdtscp_lfence();                                            \
-	getrawmonotonic(&tend);
+	LENS_GET_RAW_TS(&tend);
 
 #define PC_PRINT_MEASUREMENT(meta)                                             \
 	diff = TIMEDIFF(tstart, tend);                                         \

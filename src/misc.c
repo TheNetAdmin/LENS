@@ -24,7 +24,7 @@
 extern uint32_t *lfs_random_array;
 
 int latencyfs_getopt(const char *caller, char **options,
-		     const struct latency_option *opts, char **optopt,
+		     const struct lens_option *opts, char **optopt,
 		     char **optarg, unsigned long *value)
 {
 	char *token;

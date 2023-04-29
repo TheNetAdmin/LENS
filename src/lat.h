@@ -33,6 +33,8 @@
 #include <linux/proc_fs.h>
 #include <linux/completion.h>
 #include <linux/sched/debug.h>
+#include "comp_utils/dax_check.h"
+#include "comp_utils/proc_ops.h"
 #endif
 
 #include "common.h"
@@ -285,7 +287,7 @@ int debugging_job(void *arg);
 int wear_leveling_covert_channel_job(void *arg);
 int wear_leveling_side_channel_job(void *arg);
 
-struct latency_option {
+struct lens_option {
 	const char *name;
 	unsigned int has_arg;
 	int val;
@@ -300,7 +302,7 @@ inline unsigned long fastrand(unsigned long *x, unsigned long *y,
 inline void latencyfs_prealloc_global_permutation_array(int size);
 
 int latencyfs_getopt(const char *caller, char **options,
-		     const struct latency_option *opts, char **optopt,
+		     const struct lens_option *opts, char **optopt,
 		     char **optarg, unsigned long *value);
 void latencyfs_start_task(struct latency_sbi *sbi, int task, int threads);
 

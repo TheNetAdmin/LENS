@@ -25,11 +25,11 @@
 #include <linux/uaccess.h>
 #include "lat.h"
 
-struct proc_dir_entry *latencyfs_proc;
+struct proc_dir_entry *lens_proc;
 extern struct latency_sbi *global_sbi;
 
 
-static const struct latency_option lattest_opts[] =
+static const struct lens_option lattest_opts[] =
 {
 	{"task",           OPT_INT,    'T'},
 	{"op",             OPT_INT,    'o'},
@@ -57,10 +57,10 @@ static const struct latency_option lattest_opts[] =
 	{"threshold_cycle",OPT_INT,    'H'},
 	{"threshold_iter" ,OPT_INT,    'I'},
 	{"warm_up"        ,OPT_INT,    'W'},
-	{NULL,             0,            0}
+	{NULL             ,0      ,     0 }
 };
 
-void latencyfs_parse_cmd(struct latency_sbi *sbi, char *cmd)
+void lens_parse_cmd(struct latency_sbi *sbi, char *cmd)
 {
 	int op;
 	char *optarg;
@@ -359,7 +359,7 @@ out:
 	pr_info("parse error: %d\n", ret);
 }
 
-static ssize_t latencyfs_proc_write(struct file *file,
+static ssize_t lens_proc_write(struct file *file,
 				    const char __user *buffer, size_t count,
 				    loff_t *ppos)
 {
@@ -382,12 +382,12 @@ static ssize_t latencyfs_proc_write(struct file *file,
 	pr_info("Command [%s]\n", cmdline);
 
 	if (!global_sbi) {
-		pr_err("LatencyFS not mounted.");
+		pr_err("lens not mounted.");
 		kfree(cmdline);
 		return count;
 	}
 
-	latencyfs_parse_cmd(global_sbi, cmdline);
+	lens_parse_cmd(global_sbi, cmdline);
 
 	kfree(cmdline);
 
@@ -399,24 +399,17 @@ static ssize_t latencyfs_proc_write(struct file *file,
 		return (int)count;
 }
 
-static int latencyfs_proc_open(struct inode *inode, struct file *file)
+static int lens_proc_open(struct inode *inode, struct file *file)
 {
 	return single_open(file, latencyfs_print_help, inode->i_private);
 }
 
-static struct file_operations latencyfs_ops = {
-	.owner	 = THIS_MODULE,
-	.open	 = latencyfs_proc_open,
-	.read	 = seq_read,
-	.llseek	 = seq_lseek,
-	.release = single_release,
-	.write	 = latencyfs_proc_write,
-};
+PROC_OPS(lens_ops, lens_proc_open, lens_proc_write)
 
 int latencyfs_proc_init(void)
 {
-	latencyfs_proc = proc_create("lens", 0666, NULL, &latencyfs_ops);
-	if (!latencyfs_proc) {
+	lens_proc = proc_create("lens", 0666, NULL, &lens_ops);
+	if (!lens_proc) {
 		pr_err("/proc/lens creation failed\n");
 		return -ENOMEM;
 	}

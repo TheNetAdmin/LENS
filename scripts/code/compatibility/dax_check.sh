@@ -25,7 +25,7 @@ int main(void)
 EOF
 
 cat << EOF >Makefile
-obj-m += dax_check.o
+obj-m += ${check_api}.o
 all:
 	\${MAKE} -C "/lib/modules/$(uname -r)/build" M="$(pwd)"
 EOF
@@ -46,7 +46,7 @@ mkdir -p "${output_root}"
 
 if [ ${compatible} == "y" ]; then
 	# Old style, introduced before kernel v4.17.6
-	echo "Old"
+	echo "Linux < 4.17.6"
 	cat <<- EOF > "${output_root}/${check_api}.h"
 		#ifndef LENS_DAX_CHECK_H
 		#define LENS_DAX_CHECK_H
@@ -62,7 +62,7 @@ if [ ${compatible} == "y" ]; then
 	EOF
 else
 	# New style, introduced by kernel v4.17.6
-	echo "New"
+	echo "Linux >= 4.17.6"
 	cat <<- EOF > "${output_root}/${check_api}.h"
 		#ifndef LENS_DAX_CHECK_H
 		#define LENS_DAX_CHECK_H

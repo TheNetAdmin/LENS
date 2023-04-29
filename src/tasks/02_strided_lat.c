@@ -10,7 +10,7 @@ int strided_latjob(void *arg)
 	uint8_t *buf	    = ctx->addr;
 	uint8_t *region_end = buf + GLOBAL_WORKSET;
 	long count	    = GLOBAL_WORKSET / access_size;
-	struct timespec tstart, tend;
+	LENS_TIMESPEC tstart, tend;
 	long pages, diff;
 	int hash = 0;
 	int i;
@@ -40,14 +40,14 @@ int strided_latjob(void *arg)
 		kr_info("Running %s\n", bench_size_map[i]);
 		BENCHMARK_BEGIN(flags);
 
-		getrawmonotonic(&tstart);
+		LENS_GET_RAW_TS(&tstart);
 		PERF_START();
 
 		lfs_stride_bw[i](buf, access_size, stride_size, delay, count);
 		asm volatile("mfence \n" :::);
 
 		PERF_STOP();
-		getrawmonotonic(&tend);
+		LENS_GET_RAW_TS(&tend);
 
 		diff = TIMEDIFF(tstart, tend);
 		BENCHMARK_END(flags);

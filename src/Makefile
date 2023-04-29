@@ -26,7 +26,9 @@ latfs-y += tasks/01_basic_op.o                     \
            tasks/15_wear_leveling_covert_channel.o \
            tasks/16_wear_leveling_side_channel.o
 
-comp-h := comp_utils/dax_check.h
+comp-h := comp_utils/dax_check.h \
+          comp_utils/proc_ops.h  \
+	  comp_utils/timespec.h
 
 avx_supported := $(call as-instr,vpxor %xmm0$(comma)%xmm0$(comma)%xmm0,yes,no)
 avx2_supported := $(call as-instr,vpgatherdd %ymm0$(comma)(%eax$(comma)%ymm1\

@@ -1,9 +1,9 @@
 #include <linux/kernel.h>
 #include "overwrite.h"
 #include "common.h"
-#include "lib/pqueue-int.h"
 #include "latency.h"
 #include "../utils.h"
+#include "comp_utils/timespec.h"
 
 static void overwrite_warmup_delay(uint64_t delay)
 {
@@ -34,7 +34,7 @@ static overwrite_warmup_result_t overwrite_warmup_single(
         uint64_t max_iter)
 {
 	uint64_t cycle_beg, cycle_end;
-	struct timespec time_beg, time_end;
+	LENS_TIMESPEC time_beg, time_end;
 
 	char *curr_addr               = start_addr;
 	overwrite_warmup_result_t res = {
@@ -45,7 +45,7 @@ static overwrite_warmup_result_t overwrite_warmup_single(
 		.warmup_type = warmup_type,
 	};
 
-	getrawmonotonic(&time_beg);
+	LENS_GET_RAW_TS(&time_beg);
 	cycle_beg = rdtscp_lfence();
 
 	while (res.cycle < threshold_cycle) {
@@ -78,7 +78,7 @@ static overwrite_warmup_result_t overwrite_warmup_single(
 	}
 
 	cycle_end = rdtscp_lfence();
-	getrawmonotonic(&time_end);
+	LENS_GET_RAW_TS(&time_end);
 
 	res.total_cycle = cycle_end - cycle_beg;
 	res.total_ns    = TIMEDIFF(time_beg, time_end);

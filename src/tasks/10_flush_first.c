@@ -24,7 +24,7 @@ int flush_first_job(void *arg)
 	uint64_t cycle	     = 0;
 	int64_t cycle_signed = 0;
 	int workload_id	     = 0;
-	struct timespec tstart, tend;
+	LENS_TIMESPEC tstart, tend;
 
 	if (stride_size * count > workset_size) {
 		count = workset_size / stride_size;
@@ -86,11 +86,11 @@ int flush_first_job(void *arg)
 		return ret;
 
 #define FF_JOB_EXEC(func, fence_type)                                          \
-	getrawmonotonic(&tstart);                                              \
+	LENS_GET_RAW_TS(&tstart);                                              \
 	cycle = 0;                                                             \
 	cycle = func(region_start, access_size, stride_size, count, cindex,    \
 		     region_flush);                                            \
-	getrawmonotonic(&tend);                                                \
+	LENS_GET_RAW_TS(&tend);                                                \
 	diff = TIMEDIFF(tstart, tend);                                         \
 	cycle_signed = (int64_t)cycle;                                         \
 	if (cycle_signed < 0)                                                  \
