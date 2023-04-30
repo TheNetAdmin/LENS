@@ -7,6 +7,7 @@ output_root="./comp_utils/"
 
 echo -n "Check compatibility [${check_api}]: "
 
+rm -rf "${check_dir}"
 mkdir -p "${check_dir}"
 
 pushd "${check_dir}" >/dev/null || exit 2
@@ -39,8 +40,6 @@ if [ -f "${check_api}.o" ]; then
 fi
 
 popd >/dev/null || exit 2
-
-rm -rf "${check_dir}"
 
 mkdir -p "${output_root}"
 

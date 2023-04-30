@@ -40,8 +40,6 @@ fi
 
 popd >/dev/null || exit 2
 
-# rm -rf "${check_dir}"
-
 mkdir -p "${output_root}"
 
 if [ ${compatible} == "y" ]; then
