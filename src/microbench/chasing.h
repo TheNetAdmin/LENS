@@ -57,11 +57,11 @@ static void chasing_stnt_##PCBLOCK_SIZE(char *start_addr,                      \
 		"xor    %%r8, %%r8 \n"                 /* r8: access offset  */\
 		"xor    %%r11, %%r11 \n"               /* r11: counter       */\
 		                                                               \
-	"LOOP_CHASING_ST_NT_" #PCBLOCK_SIZE "_OUTER: \n"                       \
+	"LOOP_CHASING_ST_" #PCBLOCK_SIZE "_OUTER: \n"                          \
 		"lea    (%[start_addr], %%r8), %%r9 \n"/* r9: access loc     */\
 		"xor	%%r13, %%r13 \n"               /* r13: repeat count  */\
 		                                                               \
-	"LOOP_CHASING_ST_NT_" #PCBLOCK_SIZE "_REPEAT: \n"                      \
+	"LOOP_CHASING_ST_" #PCBLOCK_SIZE "_REPEAT: \n"                         \
 		"xor    %%r10, %%r10 \n"               /* r10: accessed size */\
 		"xor	%%r12, %%r12 \n"               /* r12: chasing index */\
 		                                                               \
@@ -69,7 +69,7 @@ static void chasing_stnt_##PCBLOCK_SIZE(char *start_addr,                      \
 		                                                               \
 		CHASING_PER_REPEAT_TIMING_BEG(%[timing])                       \
 		                                                               \
-	"LOOP_CHASING_ST_NT_" #PCBLOCK_SIZE "_INNER: \n"                       \
+	"LOOP_CHASING_ST_" #PCBLOCK_SIZE "_INNER: \n"                          \
 		CHASING_PER_BLOCK_TIMING_BEG(%[timing])                        \
 		CHASING_ST_CURR_DATA_##PCBLOCK_SIZE                            \
 		CHASING_ST_FENCE_BLOCK                                         \
@@ -80,19 +80,19 @@ static void chasing_stnt_##PCBLOCK_SIZE(char *start_addr,                      \
 		CHASING_ST_NEXT_ADDR_##PCBLOCK_SIZE                            \
 								               \
 		"cmp    %[accesssize], %%r10 \n"                               \
-		"jl     LOOP_CHASING_ST_NT_" #PCBLOCK_SIZE "_INNER \n"         \
+		"jl     LOOP_CHASING_ST_" #PCBLOCK_SIZE "_INNER \n"            \
 		CHASING_ST_FENCE_REGION                                        \
 								               \
 		"inc	%%r13 \n"				               \
 		CHASING_PER_REPEAT_TIMING_END(%[timing])                       \
 								               \
 		"cmp	%[repeat], %%r13 \n"			               \
-		"jl     LOOP_CHASING_ST_NT_" #PCBLOCK_SIZE "_REPEAT \n"        \
+		"jl     LOOP_CHASING_ST_" #PCBLOCK_SIZE "_REPEAT \n"           \
 								               \
 		"add    %[region_skip], %%r8 \n"                               \
 		"inc    %%r11 \n"                                              \
 		"cmp    %[count], %%r11 \n"                                    \
-		"jl     LOOP_CHASING_ST_NT_" #PCBLOCK_SIZE "_OUTER \n"         \
+		"jl     LOOP_CHASING_ST_" #PCBLOCK_SIZE "_OUTER \n"            \
 								               \
 		:                                                              \
 		: [start_addr]  "r"(start_addr),                               \
@@ -134,11 +134,11 @@ static void chasing_ldnt_##PCBLOCK_SIZE(char *start_addr,                      \
 		"xor    %%r8, %%r8 \n"                 /* r8: access offset  */\
 		"xor    %%r11, %%r11 \n"               /* r11: counter       */\
 		                                                               \
-	"LOOP_CHASING_LD_NT_" #PCBLOCK_SIZE "_OUTER: \n"                       \
+	"LOOP_CHASING_LD_" #PCBLOCK_SIZE "_OUTER: \n"                          \
 		"lea    (%[start_addr], %%r8), %%r9 \n"/* r9: access loc     */\
 		"xor	%%r13, %%r13 \n"               /* r13: repeat count  */\
 		                                                               \
-	"LOOP_CHASING_LD_NT_" #PCBLOCK_SIZE "_REPEAT: \n"                      \
+	"LOOP_CHASING_LD_" #PCBLOCK_SIZE "_REPEAT: \n"                         \
 		"xor    %%r10, %%r10 \n"               /* r10: accessed size */\
 		"xor	%%r12, %%r12 \n"               /* r12: chasing index */\
 		                                                               \
@@ -146,7 +146,7 @@ static void chasing_ldnt_##PCBLOCK_SIZE(char *start_addr,                      \
 		                                                               \
 		CHASING_PER_REPEAT_TIMING_BEG(%[timing])                       \
 		                                                               \
-	"LOOP_CHASING_LD_NT_" #PCBLOCK_SIZE "_INNER: \n"                       \
+	"LOOP_CHASING_LD_" #PCBLOCK_SIZE "_INNER: \n"                          \
 		"imul   %[block_skip], %%r12\n"                                \
 		CHASING_PER_BLOCK_TIMING_BEG(%[timing])                        \
 		CHASING_LD_##PCBLOCK_SIZE(0)                                   \
@@ -156,20 +156,20 @@ static void chasing_ldnt_##PCBLOCK_SIZE(char *start_addr,                      \
 		CHASING_LD_NEXT_ADDR_##PCBLOCK_SIZE                            \
 								               \
 		"cmp    %[accesssize], %%r10 \n"                               \
-		"jl     LOOP_CHASING_LD_NT_" #PCBLOCK_SIZE "_INNER \n"         \
+		"jl     LOOP_CHASING_LD_" #PCBLOCK_SIZE "_INNER \n"            \
 		CHASING_LD_FENCE_REGION                                        \
 								               \
 		"inc	%%r13 \n"				               \
 		CHASING_PER_REPEAT_TIMING_END(%[timing])                       \
 								               \
 		"cmp	%[repeat], %%r13 \n"			               \
-		"jl     LOOP_CHASING_LD_NT_" #PCBLOCK_SIZE "_REPEAT \n"        \
+		"jl     LOOP_CHASING_LD_" #PCBLOCK_SIZE "_REPEAT \n"           \
 								               \
 		"add    %[region_skip], %%r8 \n"                               \
 		"inc    %%r11 \n"                                              \
 		"cmp    %[count], %%r11 \n"                                    \
 								               \
-		"jl     LOOP_CHASING_LD_NT_" #PCBLOCK_SIZE "_OUTER \n"         \
+		"jl     LOOP_CHASING_LD_" #PCBLOCK_SIZE "_OUTER \n"            \
 								               \
 		:                                                              \
 		: [start_addr]  "r"(start_addr),                               \
@@ -199,11 +199,11 @@ static void chasing_read_after_write_##PCBLOCK_SIZE(char *start_addr,          \
 		"xor    %%r8, %%r8 \n"                 /* r8: access offset  */\
 		"xor    %%r11, %%r11 \n"               /* r11: counter       */\
 		                                                               \
-	"LOOP_CHASING_RAW_NT_" #PCBLOCK_SIZE "_OUTER: \n"                      \
+	"LOOP_CHASING_RAW_" #PCBLOCK_SIZE "_OUTER: \n"                         \
 		"lea    (%[start_addr], %%r8), %%r9 \n"/* r9: access loc     */\
 		"xor	%%r13, %%r13 \n"               /* r13: repeat count  */\
 		                                                               \
-	"LOOP_CHASING_RAW_NT_" #PCBLOCK_SIZE "_REPEAT: \n"                     \
+	"LOOP_CHASING_RAW_" #PCBLOCK_SIZE "_REPEAT: \n"                        \
 		"xor    %%r10, %%r10 \n"               /* r10: accessed size */\
 		"xor	%%r12, %%r12 \n"               /* r12: chasing index */\
 		                                                               \
@@ -211,7 +211,7 @@ static void chasing_read_after_write_##PCBLOCK_SIZE(char *start_addr,          \
 		                                                               \
 		CHASING_PER_REPEAT_TIMING_BEG(%[timing])                       \
 		                                                               \
-	"LOOP_CHASING_RAW_NT_WRITE_" #PCBLOCK_SIZE "_INNER: \n"                \
+	"LOOP_CHASING_RAW_WRITE_" #PCBLOCK_SIZE "_INNER: \n"                   \
 		CHASING_ST_CURR_DATA_##PCBLOCK_SIZE                            \
 		CHASING_ST_FENCE_BLOCK                                         \
 		"imul   %[block_skip], %%r12\n"                                \
@@ -220,14 +220,14 @@ static void chasing_read_after_write_##PCBLOCK_SIZE(char *start_addr,          \
 		CHASING_ST_NEXT_ADDR_##PCBLOCK_SIZE                            \
 								               \
 		"cmp    %[accesssize], %%r10 \n"                               \
-		"jl     LOOP_CHASING_RAW_NT_WRITE_" #PCBLOCK_SIZE "_INNER \n"  \
+		"jl     LOOP_CHASING_RAW_WRITE_" #PCBLOCK_SIZE "_INNER \n"     \
 		CHASING_ST_FENCE_REGION                                        \
 								               \
 		CHASING_MFENCE					               \
 								               \
 		"xor    %%r10, %%r10 \n"               /* r10: accessed size */\
 		"xor	%%r12, %%r12 \n"               /* r12: chasing index */\
-	"LOOP_CHASING_RAW_NT_READ_" #PCBLOCK_SIZE "_INNER: \n"                 \
+	"LOOP_CHASING_RAW_READ_" #PCBLOCK_SIZE "_INNER: \n"                    \
 		"imul   %[block_skip], %%r12\n"                                \
 		CHASING_LD_##PCBLOCK_SIZE(0)                                   \
 		CHASING_LD_FENCE_BLOCK                                         \
@@ -235,20 +235,20 @@ static void chasing_read_after_write_##PCBLOCK_SIZE(char *start_addr,          \
 		CHASING_LD_NEXT_ADDR_##PCBLOCK_SIZE                            \
 								               \
 		"cmp    %[accesssize], %%r10 \n"                               \
-		"jl     LOOP_CHASING_RAW_NT_READ_" #PCBLOCK_SIZE "_INNER \n"   \
+		"jl     LOOP_CHASING_RAW_READ_" #PCBLOCK_SIZE "_INNER \n"      \
 		CHASING_LD_FENCE_REGION                                        \
 									       \
 		"inc	%%r13 \n"				               \
 		CHASING_PER_REPEAT_TIMING_END(%[timing])                       \
 									       \
 		"cmp	%[repeat], %%r13 \n"			               \
-		"jl     LOOP_CHASING_RAW_NT_" #PCBLOCK_SIZE "_REPEAT \n"       \
+		"jl     LOOP_CHASING_RAW_" #PCBLOCK_SIZE "_REPEAT \n"          \
 									       \
 		"add    %[region_skip], %%r8 \n"                               \
 		"inc    %%r11 \n"                                              \
 		"cmp    %[count], %%r11 \n"                                    \
 								               \
-		"jl     LOOP_CHASING_RAW_NT_" #PCBLOCK_SIZE "_OUTER \n"        \
+		"jl     LOOP_CHASING_RAW_" #PCBLOCK_SIZE "_OUTER \n"           \
 								               \
 		:                                                              \
 		: [start_addr]  "r"(start_addr),                               \

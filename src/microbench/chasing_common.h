@@ -342,13 +342,35 @@
 	CHASING_PRINT_RECORD_TIMING_BASE(prefix, timing_buf, repeat, 0)
 #endif
 
+#ifndef CHASING_ST_NT
+#define CHASING_ST_NT 1
+#endif /* CHASING_ST_NT */
+
+#if CHASING_ST_NT == 0
+#define CHASING_ST_ASM_64 "vmovdq "
+#else /* CHASING_ST_NT == 1 */
+#define CHASING_ST_ASM_64 "vmovntdq "
+#endif /* CHASING_ST_NT */
+
+
+#ifndef CHASING_LD_NT
+#define CHASING_LD_NT 1
+#endif // CHASING_LD_NT
+
+#if CHASING_LD_NT == 0
+#define CHASING_LD_ASM_8  "movdqa "
+#define CHASING_LD_ASM_64 "vmovdqa "
+#else /* CHASING_LD_NT == 1 */
+#define CHASING_LD_ASM_8  "movntdqa "
+#define CHASING_LD_ASM_64 "vmovntdqa "
+#endif /* CHASING_LD_NT */
 
 /* 
  * Macros to generate memory access instructions.
  * `../scripts/code/expand_macro.sh chasing.h` to view macro expansion results.
  */
 #define CHASING_ST_64_AVX(cl_index)                                            \
-	"vmovntdq	%%zmm0, (64 * (" #cl_index "))(%%r9, %%r12)\n"         \
+	CHASING_ST_ASM_64 "	%%zmm0, (64 * (" #cl_index "))(%%r9, %%r12)\n" \
 	CHASING_STORE_FLUSH(cl_index)
 
 #define CHASING_ST_64(cl_base)                                                 \
@@ -379,11 +401,11 @@
 	CHASING_ST_2048(cl_base + 32)
 
 #define CHASING_LD_64_AVX(cl_index)                                            \
-	"vmovntdqa	(64 * (" #cl_index "))(%%r9, %%r12), %%zmm0\n"	       \
+	CHASING_LD_ASM_64 "	(64 * (" #cl_index "))(%%r9, %%r12), %%zmm0\n" \
 	CHASING_LOAD_FLUSH(cl_index)
 
 #define CHASING_LD_8_REG(cl_index)                                             \
-	"movntdqa       (64 * (" #cl_index "))(%%r9, %%r12), %%r13\n"	       \
+	CHASING_LD_ASM_8 "       (64 * (" #cl_index "))(%%r9, %%r12), %%r13\n"\
 	CHASING_LOAD_FLUSH(cl_index)
 
 #define CHASING_LD_8(cl_base)                                                  \
