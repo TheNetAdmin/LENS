@@ -119,7 +119,7 @@ all)
                     # See following:
                     #   - src/Makefile
                     #   - src/microbench/chasing.h
-                    export LENS_MAKE_ARGS="-DCHASING_FENCE_STRATEGY_ID=$fence_strategy -DCHASING_FENCE_FREQ_ID=$fence_freq -DCHASING_FLUSH_AFTER_LOAD=$flush_after_load -DCHASING_ST_NT=$non_temporal -DCHASING_LD_NT=$non_temporal"
+                    export LENS_MAKE_ARGS="-DCHASING_FENCE_STRATEGY_ID=$fence_strategy -DCHASING_FENCE_FREQ_ID=$fence_freq -DCHASING_FLUSH_AFTER_LOAD=$flush_after_load -DCHASING_ST_NT=$non_temporal -DCHASING_LD_NT=$non_temporal -DAVX_512=0"
                     est_total=$(estimate_time_hours ${#stride_array[@]} ${#region_array[@]})
                     est_checkpoint=$(estimate_time_hours ${#stride_array[@]} 1)
                     slack_notice $SlackURL "[Start   ] $(basename "$0") [FenceStrategy=$fence_strategy] [FenceFreq=$fence_freq] [FlushAfterLoad=$flush_after_load] [Repeat=$repeat] [SubOP=$sub_op] [RegionAlign=$region_align] [EstHours=$est_total)] [EstPerCheckpoint=$est_checkpoint]"
