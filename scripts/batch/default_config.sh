@@ -131,7 +131,7 @@ case "${host_name}" in
 		#            DIMM size is smaller than the real size. You may make more
 		#            precise calculation by calculating how much `uc_base`
 		#            passes the NVRAM's `phys_addr`
-		export dimm_size=$((15 * 2 ** 30))
+		export dimm_size=$((8 * 2 ** 30))
 	;;
 	lens)
 		# lens vm -- Inside a virtual machine for lens/nvleak debugging
