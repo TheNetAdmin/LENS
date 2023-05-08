@@ -114,9 +114,10 @@ sudo dmesg --read-clear > $TaskDir/dmesg_before.txt
     echo \#\#\# "MSR 0x1a4 (cache prefetcher) status:"
          if ! rdmsr -a 0x1a4; then 
             echo "ERROR: rdmsr failed"
-            exit 1
+            # exit 1
+		 else
+			rdmsr -a 0x1a4 | tr '\n' ' '
          fi
-         rdmsr -a 0x1a4 | tr '\n' ' '
     echo
     echo \#\#\# ndctl list:
          ndctl list

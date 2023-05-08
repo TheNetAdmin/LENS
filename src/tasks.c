@@ -36,6 +36,8 @@ uint8_t *get_uc_addr(struct latencyfs_worker_ctx *ctx, uc_addr_align_mode_t alig
 		addr = (uint8_t *)(phys_to_virt(0x2000000000));
 	} else if (0 == strcmp(hostname, "lens")) {
 		addr = (uint8_t *)(phys_to_virt(0x180000000));
+	} else if (0 == strcmp(hostname, "netserver")) {
+		addr = (uint8_t *)(ctx->addr);
 	} else {
 		BUG_ON("Unrecognized hostname");
 	}
@@ -54,7 +56,7 @@ uint8_t *get_uc_addr(struct latencyfs_worker_ctx *ctx, uc_addr_align_mode_t alig
 
 	pr_info("get_uc_addr(): hostname=%s, align_size=0x%016llx, orig_addr=0x%px, uc_addr=0x%px, uc_phys_addr=0x%016llx\n",
 	        hostname,
-		ctx->sbi->align_size,
+	        ctx->sbi->align_size,
 	        ctx->addr,
 	        addr,
 	        virt_to_phys((void *)addr));
@@ -82,6 +84,8 @@ uint64_t get_dimm_size(void)
 		return (128ULL * GB - 32ULL * GB);
 	} else if (0 == strcmp(hostname, "lens")) {
 		return (4UL * GB);
+	} else if (0 == strcmp(hostname, "netserver")) {
+		return (8UL * GB);
 	} else {
 		BUG_ON("Unrecognized hostname");
 	}

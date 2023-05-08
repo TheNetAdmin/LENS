@@ -42,7 +42,10 @@
 #define CHASING_ST_NEXT_ADDR_2048 CHASING_ST_NEXT_ADDR_AVX
 #define CHASING_ST_NEXT_ADDR_4096 CHASING_ST_NEXT_ADDR_AVX
 
+/* https://stackoverflow.com/a/69892702 */
+
 #define CHASING_ST(PCBLOCK_SIZE)                                               \
+__attribute__((target("avx2,bmi2"))) \
 static void chasing_stnt_##PCBLOCK_SIZE(char *start_addr,                      \
 					uint64_t size,                         \
 					uint64_t block_skip,                   \
@@ -120,6 +123,7 @@ static void chasing_stnt_##PCBLOCK_SIZE(char *start_addr,                      \
 #define CHASING_LD_NEXT_ADDR_4096 CHASING_LD_NEXT_ADDR_AVX
 
 #define CHASING_LD(PCBLOCK_SIZE)                                               \
+__attribute__((target("avx2,bmi2"))) \
 static void chasing_ldnt_##PCBLOCK_SIZE(char *start_addr,                      \
 					uint64_t size,                         \
 					uint64_t block_skip,                   \
@@ -185,6 +189,7 @@ static void chasing_ldnt_##PCBLOCK_SIZE(char *start_addr,                      \
 }
 
 #define CHASING_READ_AFTER_WRITE(PCBLOCK_SIZE)                                 \
+__attribute__((target("avx2,bmi2"))) \
 static void chasing_read_after_write_##PCBLOCK_SIZE(char *start_addr,          \
 						    uint64_t size,             \
 						    uint64_t block_skip,       \

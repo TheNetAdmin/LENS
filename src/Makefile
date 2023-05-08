@@ -1,6 +1,6 @@
 obj-m += repfs.o latfs.o
 
-ccflags-y+=-mmmx -msse2 -mavx -mpreferred-stack-boundary=4
+ccflags-y+=-mmmx -msse2 -mavx -mavx2 -mpreferred-stack-boundary=4
 ccflags-y+=-I ${PWD}
 repfs-y := rep.o
 latfs-y := lat.o proc.o misc.o memaccess.o tasks.o
