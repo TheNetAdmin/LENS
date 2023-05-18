@@ -32,26 +32,8 @@ function estimate_time_hours() {
 block_size=64
 prev_stride_array=()
 stride_array=(
-    $(seq -s ' ' $((2 ** 6)) $((2 ** 6)) $((2 ** 11 - 1)))   # [256B,    4KB) per  256B -> 15
+    $(seq -s ' ' $((2 ** 6)) $((2 ** 6)) $((2 ** 10 - 1)))
 )
-##If region_skip == 512MB and stride_size == 64MB
-# -> region_size / block_size * stride_size == 512MB
-# -> region_size = 512MB / 64MB * 8
-# -> region_size = 64 = 2**6
-##If region_skip == 128GB and stride_size == 64MB
-# -> region_size / block_size * stride_size == 128GB
-# -> region_size = 128GB / 64MB * 8
-# -> region_size = 16K = 16*1024 = 2**14
-##region == 2**13 --> 8182 --> more than 4096 entries in ait buffer
-# prev_region_array=(
-#     $((2 ** 6)) $((2 ** 7)) $((2 ** 8)) $((2 ** 9))
-#     $(seq -s ' ' $((2 ** 10)) $((2 ** 9)) $((2 ** 13 - 1)))  # [  1KB,   8KB) per  512B -> 15
-#     $(seq -s ' ' $((2 ** 13)) $((2 ** 10)) $((2 ** 14 - 1))) # [  8KB,  16KB) per   1KB ->  7
-#     $(seq -s ' ' $((2 ** 14)) $((2 ** 13)) $((2 ** 16 - 1))) # [ 16KB,  64KB) per   8KB ->  6
-#     $(seq -s ' ' $((2 ** 16)) $((2 ** 14)) $((2 ** 19 - 1))) # [ 64KB, 512KB) per  32KB -> 15
-#     $(seq -s ' ' $((2 ** 19)) $((2 ** 16)) $((2 ** 20 - 1))) # [512KB,   1MB) per  64KB ->  7
-#     $((2 ** 20))
-# )
 
 prev_region_array=()
 region_array=(

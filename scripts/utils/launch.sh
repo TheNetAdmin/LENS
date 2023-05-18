@@ -13,6 +13,9 @@ export TaskDir="$(realpath $(dirname $0))/../../results/tasks/$TaskID"
 Profiler=${Profiler:-none}
 source $(realpath $(dirname $0))/profiler/$Profiler/profiler.sh
 
+# Prefetcher settings
+source $(realpath $(dirname $0))/prefetcher/prefetcher.sh
+
 # Slack envs
 Slack=${Slack:-0}
 SlackURL=${SlackURL:-}
@@ -38,10 +41,7 @@ prepare() {
     # Disable cache prefetcher
 	if [ "${disable_prefetcher}" != "n" ]; then
 		echo "Disabling cache prefetcher"
-		if ! sudo lsmod | grep -q "msr"; then
-			sudo modprobe msr
-		fi
-		sudo wrmsr -a 0x1a4 0xf
+		set_prefetcher off
 	else
 		echo "Skipping disabling cache prefetcher"
 	fi
@@ -56,7 +56,7 @@ prepare() {
 cleanup() {
     # Enable cache prefetcher
 	if [ "${disable_prefetcher}" != "n" ]; then
-		sudo wrmsr -a 0x1a4 0x0
+		set_prefetcher on
 	fi
 
     # Stop and unload profiler
@@ -112,12 +112,7 @@ sudo dmesg --read-clear > $TaskDir/dmesg_before.txt
         cat /proc/mtrr
     echo
     echo \#\#\# "MSR 0x1a4 (cache prefetcher) status:"
-         if ! rdmsr -a 0x1a4; then 
-            echo "ERROR: rdmsr failed"
-            # exit 1
-		 else
-			rdmsr -a 0x1a4 | tr '\n' ' '
-         fi
+         set_prefetcher show
     echo
     echo \#\#\# ndctl list:
          ndctl list

@@ -16,8 +16,10 @@ set_prefetcher_intel() {
 	mode="$1"
 	if [ "$mode" == "off" ]; then
 		wrmsr -a 0x1a4 0xf
-	else
+	elif [ "$mode" == "on" ]; then
 		wrmsr -a 0x1a4 0x0
+	elif [ "$mode" == "show" ]; then
+		rdmsr -a 0x1a4
 	fi
 }
 
@@ -43,12 +45,17 @@ set_prefetcher_amd() {
 				wrmsr -a 0xc0011022 0xc000000401570000
 				wrmsr -a 0xc001102b 0x2000cc10
 				echo "MSR register values for Zen3 applied: OFF"
-			else
+			elif [ "$mode" == "on" ]; then
 				wrmsr -a 0xc0011020 0x4480000000000
 				wrmsr -a 0xc0011021 0x2000000c0
 				wrmsr -a 0xc0011022 0xc000000401500000
 				wrmsr -a 0xc001102b 0x2000cc15
 				echo "MSR register values for Zen3 applied: ON"
+			elif [ "$mode" == "show" ]; then
+				rdmsr -a 0xc0011020
+				rdmsr -a 0xc0011021
+				rdmsr -a 0xc0011022
+				rdmsr -a 0xc001102b
 			fi
 		fi
 	else
@@ -66,6 +73,7 @@ set_prefetcher_amd() {
 }
 
 set_prefetcher() {
+	check_msr_module
 	if grep -E 'AMD Ryzen|AMD EPYC' /proc/cpuinfo >/dev/null; then
 		set_prefetcher_amd $*
 	else
