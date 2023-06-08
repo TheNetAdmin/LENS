@@ -39,6 +39,7 @@ prepare() {
 	fi
 
     # Disable cache prefetcher
+	echo "Disable prefetcher: ${disable_prefetcher}"
 	if [ "${disable_prefetcher}" != "n" ]; then
 		echo "Disabling cache prefetcher"
 		set_prefetcher off

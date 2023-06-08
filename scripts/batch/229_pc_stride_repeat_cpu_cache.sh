@@ -32,7 +32,7 @@ function estimate_time_hours() {
 block_size=64
 prev_stride_array=()
 stride_array=(
-    $(seq -s ' ' $((2 ** 6)) $((2 ** 6)) $((2 ** 10 - 1)))
+    $(seq -s ' ' $((2 ** 6)) $((2 ** 6)) $((2 ** 11 - 1)))
 )
 
 prev_region_array=()
@@ -43,9 +43,10 @@ region_array=(
     $((2 ** 18)) $((2 ** 19)) $((2 ** 20)) $((2 ** 21))
     $((2 ** 22)) $((2 ** 23)) $((2 ** 24)) $((2 ** 25))
     $((2 ** 26)) $((2 ** 27)) $((2 ** 28)) $((2 ** 29))
+    $((2 ** 30)) $((2 ** 31)) $((2 ** 32)) $((2 ** 33))
 )
 sub_op_array=(0)
-repeat=16
+repeat=1
 region_align=4096
 
 fence_strategy_array=(0)

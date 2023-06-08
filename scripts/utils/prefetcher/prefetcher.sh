@@ -2,11 +2,11 @@
 # https://github.com/xmrig/xmrig/blob/7b51e23aa0d7c3f500aec889dcaef312d870ef53/scripts/randomx_boost.sh
 
 check_msr_module() {
-	if ! lsmod | grep 'msr'; then
+	if ! lsmod | grep 'msr' > /dev/null; then
 		echo "ERROR: module 'msr' not inserted"
 		exit 1
 	fi
-	if ! which rdmsr; then
+	if ! which rdmsr > /dev/null; then
 		echo "ERROR: command 'rdmsr' not found"
 		exit 1
 	fi
@@ -80,6 +80,3 @@ set_prefetcher() {
 		set_prefetcher_intel $*
 	fi
 }
-
-export -f check_msr_module
-export -f set_prefetcher
