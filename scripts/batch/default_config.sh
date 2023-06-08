@@ -69,7 +69,7 @@ case "${host_name}" in
 		#            passes the NVRAM's `phys_addr`
 		export dimm_size=$((90 * 2 ** 30))
 	;;
-	netserver)
+	netserver*)
 		# rep_dev: The DRAM-emulated PMEM device, created by Linux kernel's boot
 		#          command `memmap`
 		export rep_dev="${rep_dev:-/dev/pmem0}"

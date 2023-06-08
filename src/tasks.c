@@ -38,6 +38,8 @@ uint8_t *get_uc_addr(struct latencyfs_worker_ctx *ctx, uc_addr_align_mode_t alig
 		addr = (uint8_t *)(phys_to_virt(0x180000000));
 	} else if (0 == strcmp(hostname, "netserver")) {
 		addr = (uint8_t *)(ctx->addr);
+	} else if (0 == strcmp(hostname, "netserver-ubuntu")) {
+		addr = (uint8_t *)(ctx->addr);
 	} else {
 		BUG_ON("Unrecognized hostname");
 	}
@@ -85,6 +87,8 @@ uint64_t get_dimm_size(void)
 	} else if (0 == strcmp(hostname, "lens")) {
 		return (4UL * GB);
 	} else if (0 == strcmp(hostname, "netserver")) {
+		return (8UL * GB);
+	} else if (0 == strcmp(hostname, "netserver-ubuntu")) {
 		return (8UL * GB);
 	} else {
 		BUG_ON("Unrecognized hostname");

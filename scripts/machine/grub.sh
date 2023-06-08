@@ -24,6 +24,8 @@ grub_apply() {
         update-grub
     elif [ "$host_name" == "nv-4" ]; then
         update-grub
+    elif [ "$host_name" == "netserver-ubuntu" ]; then
+		update-grub
 	else
 		echo "Unknown host: [$host_name]"
 		exit 2
@@ -39,10 +41,10 @@ grub_setup_aep2() {
     fi
 
 cat <<- EOF >>$grub_file
-### NVLeak grub start
+### LENS grub start
 GRUB_DEFAULT=${grub_default_kernel}
 GRUB_CMDLINE_LINUX="rd.lvm.lv=fedora/root rd.lvm.lv=fedora/swap rhgb quiet console=ttyS0,115200 modprobe.blacklist=noueavu modprobe.blacklist=qat_c62x nokaslr memmap=32G!16G log-buf-len=1G"
-### NVLeak grub end
+### LENS grub end
 EOF
 }
 
@@ -50,10 +52,10 @@ grub_setup_sdp() {
     grub_default_kernel=0
 
 cat <<- EOF >>$grub_file
-### NVLeak grub start
+### LENS grub start
 GRUB_DEFAULT=${grub_default_kernel}
 GRUB_CMDLINE_LINUX="nokaslr memmap=32G!16G log-buf-len=1G mitigations=off"
-### NVLeak grub end
+### LENS grub end
 EOF
 }
 
@@ -62,17 +64,25 @@ grub_setup_nv_4() {
     grub_default_kernel=0
 
 cat <<- EOF >>$grub_file
-### NVLeak grub start
+### LENS grub start
 GRUB_DEFAULT=${grub_default_kernel}
 GRUB_CMDLINE_LINUX="nokaslr memmap=32G!16G log-buf-len=1G mitigations=off"
-### NVLeak grub end
+### LENS grub end
+EOF
+}
+
+grub_setup_netserver() {
+cat <<- EOF >>$grub_file
+### LENS grub start
+GRUB_CMDLINE_LINUX="nokaslr memmap=16G!16G memmap=16G!48G log-buf-len=1G mitigations=off"
+### LENS grub end
 EOF
 }
 
 grub_setup() {
     echo "Grub setup"
 
-    if grep -q "NVLeak grub start" "$grub_file"; then
+    if grep -q "LENS grub start" "$grub_file"; then
         echo "Config already in grub file"
         exit 1
     fi
@@ -83,6 +93,8 @@ grub_setup() {
         grub_setup_sdp $*
     elif [ "$host_name" == "nv-4" ]; then
         grub_setup_nv_4 $*
+    elif [ "$host_name" == "netserver-ubuntu" ]; then
+		grub_setup_netserver $*
 	else
 		echo "Unknown host: [$host_name]"
 		exit 2
@@ -105,7 +117,7 @@ grub_reset() {
     echo "Grub reset"
     
     # https://stackoverflow.com/questions/37680636/sed-multiline-delete-with-pattern
-    sed -i '/### NVLeak grub start/{:a;N;/### NVLeak grub end/!ba};//d' $grub_file
+    sed -i '/### LENS grub start/{:a;N;/### LENS grub end/!ba};//d' $grub_file
 
     cp $grub_file $operation_path/grub.aft
 

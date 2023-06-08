@@ -342,49 +342,71 @@
 	CHASING_PRINT_RECORD_TIMING_BASE(prefix, timing_buf, repeat, 0)
 #endif
 
-#ifndef CHASING_AVX512
-#define CHASING_AVX512 0
-#endif // CHASING_AVX512
 
-#if CHASING_AVX512 == 0
-#define DATA_REG "ymm0"
-#else /* CHASING_AVX512 == 1 */
-#define DATA_REG "zmm0"
-#endif /* CHASING_AVX512 */
+#ifndef CHASING_USE_AVX
+#define CHASING_USE_AVX 1
+#endif /* CHASING_USE_AVX */
 
 #ifndef CHASING_ST_NT
 #define CHASING_ST_NT 0
 #endif /* CHASING_ST_NT */
 
-#if CHASING_ST_NT == 0
-#define CHASING_ST_ASM_64 "vmovdqa "
-#else /* CHASING_ST_NT == 1 */
-#define CHASING_ST_ASM_64 "vmovntdq "
-#endif /* CHASING_ST_NT */
-
-
 #ifndef CHASING_LD_NT
 #define CHASING_LD_NT 0
 #endif // CHASING_LD_NT
 
-#if CHASING_LD_NT == 0
-#define CHASING_LD_ASM_8  "movdqa "
-#define CHASING_LD_ASM_64 "vmovdqa "
-#else /* CHASING_LD_NT == 1 */
-#define CHASING_LD_ASM_8  "movntdqa "
-#define CHASING_LD_ASM_64 "vmovntdqa "
-#endif /* CHASING_LD_NT */
+#if CHASING_USE_AVX == 0
+	#define CHASING_ST_ASM_8  "movq "
+	#define CHASING_LD_ASM_8  "movq "
+#else /* CHASING_USE_AVX == 1 */
+	#ifndef CHASING_AVX512
+	#define CHASING_AVX512 0
+	#endif // CHASING_AVX512
+
+	#if CHASING_AVX512 == 0
+	#define DATA_REG "ymm0"
+	#else /* CHASING_AVX512 == 1 */
+	#define DATA_REG "zmm0"
+	#endif /* CHASING_AVX512 */
+
+	#if CHASING_ST_NT == 0
+	#define CHASING_ST_ASM_64 "vmovdqa "
+	#else /* CHASING_ST_NT == 1 */
+	#define CHASING_ST_ASM_64 "vmovntdq "
+	#endif /* CHASING_ST_NT */
+
+	#if CHASING_LD_NT == 0
+	#define CHASING_LD_ASM_8  "movdqa "
+	#define CHASING_LD_ASM_64 "vmovdqa "
+	#else /* CHASING_LD_NT == 1 */
+	#define CHASING_LD_ASM_8  "movntdqa "
+	#define CHASING_LD_ASM_64 "vmovntdqa "
+	#endif /* CHASING_LD_NT */
+#endif /* CHASING_USE_AVX */
+
 
 /* 
  * Macros to generate memory access instructions.
  * `../../scripts/code/expand_macro.sh chasing.h` to view macro expansion results.
  */
+#define CHASING_ST_8_REG(cl_index)                                             \
+	CHASING_ST_ASM_8 " %%r13, (64 * (" #cl_index "))(%%r9, %%r12)\n"       \
+	CHASING_STORE_FLUSH(cl_index)
+
+#define CHASING_ST_8(cl_base)                                                  \
+	CHASING_ST_8_REG(cl_base)
+
+#if CHASING_USE_AVX == 0
+#define CHASING_ST_64(cl_base)                                                 \
+	CHASING_ST_8(cl_base)
+#else /* CHASING_USE_AVX == 1 */
 #define CHASING_ST_64_AVX(cl_index)                                            \
 	CHASING_ST_ASM_64 " %%" DATA_REG ", (64 * (" #cl_index "))(%%r9, %%r12)\n" \
 	CHASING_STORE_FLUSH(cl_index)
-
 #define CHASING_ST_64(cl_base)                                                 \
 	CHASING_ST_64_AVX(cl_base)
+#endif /* CHASING_USE_AVX */
+
 
 #define CHASING_ST_128(cl_base)                                                \
 	CHASING_ST_64(cl_base + 0)                                             \
@@ -410,10 +432,6 @@
 	CHASING_ST_2048(cl_base + 0)                                           \
 	CHASING_ST_2048(cl_base + 32)
 
-#define CHASING_LD_64_AVX(cl_index)                                            \
-	CHASING_LD_ASM_64 "	(64 * (" #cl_index "))(%%r9, %%r12), %%" DATA_REG "\n" \
-	CHASING_LOAD_FLUSH(cl_index)
-
 #define CHASING_LD_8_REG(cl_index)                                             \
 	CHASING_LD_ASM_8 "       (64 * (" #cl_index "))(%%r9, %%r12), %%r13\n"\
 	CHASING_LOAD_FLUSH(cl_index)
@@ -421,8 +439,16 @@
 #define CHASING_LD_8(cl_base)                                                  \
 	CHASING_LD_8_REG(cl_base)
 
+#if CHASING_USE_AVX == 0
+#define CHASING_LD_64(cl_base)                                                 \
+	CHASING_LD_8(cl_base)
+#else /* CHASING_USE_AVX == 1 */
+#define CHASING_LD_64_AVX(cl_index)                                            \
+	CHASING_LD_ASM_64 "	(64 * (" #cl_index "))(%%r9, %%r12), %%" DATA_REG "\n" \
+	CHASING_LOAD_FLUSH(cl_index)
 #define CHASING_LD_64(cl_base)                                                 \
 	CHASING_LD_64_AVX(cl_base)
+#endif /* CHASING_USE_AVX */
 
 #define CHASING_LD_128(cl_base)                                                \
 	CHASING_LD_64(cl_base + 0)                                             \
@@ -478,7 +504,7 @@ typedef struct chasing_func_entry {
 	.fence_strategy            = CHASING_FENCE_STRATEGY,                   \
 	.fence_freq                = CHASING_FENCE_FREQ,                       \
 	.flush_after_load          = CHASING_FLUSH_AFTER_LOAD_TYPE,            \
-	.flush_after_store          = CHASING_FLUSH_AFTER_STORE_TYPE,          \
+	.flush_after_store         = CHASING_FLUSH_AFTER_STORE_TYPE,           \
 	.flush_l1                  = CHASING_FLUSH_L1_TYPE,                    \
 	.flush_l1_flush_after_load = CHASING_FLUSH_L1_FLUSH_AFTER_LOAD_TYPE,   \
 	.record_timing             = CHASING_RECORD_TIMING_TYPE,               \

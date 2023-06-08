@@ -20,6 +20,8 @@
 
 #include "chasing_common.h"
 
+/* TODO: Configure temporal or non-temporal, avx or non-avx */
+
 #define CHASING_ST_CURR_DATA_AVX                                               \
 	"vmovq  (%[cindex], %%r12, 8), %%xmm0\n"
 
@@ -43,6 +45,7 @@
 #define CHASING_ST_NEXT_ADDR_4096 CHASING_ST_NEXT_ADDR_AVX
 
 /* https://stackoverflow.com/a/69892702 */
+/* TODO: Convert this __attribute__ to a macro */
 
 #define CHASING_ST(PCBLOCK_SIZE)                                               \
 __attribute__((target("avx2,bmi2"))) \
