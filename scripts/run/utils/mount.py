@@ -2,6 +2,7 @@ from loguru import logger
 from contextlib import chdir # Available starting from python 3.11
 import os
 import subprocess
+from .utils import run_cmd
 
 def _build_modules(config):
     with chdir("src"):
@@ -12,7 +13,7 @@ def _build_modules(config):
         subprocess.Popen(cmd, shell=True)
 
         logger.info("Compiling")
-        subprocess.run(["make", "-j", f"os.cpu_count()"], shell=True)
+        run_cmd(f"make -j {os.cpu_count()}", check_output=True)
 
 
 def mount_kernel_modules(config):
