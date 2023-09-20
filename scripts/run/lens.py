@@ -27,6 +27,11 @@ def umount(ctx):
 def run(ctx):
     pass
 
+@lens.command()
+@click.pass_context
+def test(ctx):
+    logger.info("This is a testing message")
+
 if __name__ == "__main__":
     setup_logger()
     lens()
