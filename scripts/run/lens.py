@@ -4,6 +4,7 @@ from utils.logging import setup_logger
 from utils.mount import mount_kernel_modules
 from config.config import config
 from loguru import logger
+from utils.remote import ssh_manager
 
 @click.group()
 @click.pass_context
@@ -31,6 +32,8 @@ def run(ctx):
 @click.pass_context
 def test(ctx):
     logger.info("This is a testing message")
+    with ssh_manager('netserver') as ssh:
+        ssh.run_cmd("uname -a")
 
 if __name__ == "__main__":
     setup_logger()

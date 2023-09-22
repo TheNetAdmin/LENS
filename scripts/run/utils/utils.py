@@ -36,8 +36,8 @@ class cmd_fail(Enum):
 
 def run_cmd(
     cmd,
-    script,
-    comment,
+    script=None,
+    comment=None,
     check=True,
     on_cmd_fail=cmd_fail.capture_and_exit,
     *args,
