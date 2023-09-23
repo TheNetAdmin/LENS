@@ -88,26 +88,32 @@ def run_cmd_script(cmds, script="lens_script.sh", *args, **kwargs):
 
 
 class cmd(object):
-    def __init__(self, cmd, parent_runner = None) -> None:
-        self.cmd = make_cmd(self.setup_cmd(cmd))
-        self.parent_cmd = parent_runner.cmd if parent_runner else []
-
+    def __init__(self, cmd = None, parent_runner = None) -> None:
+        self.cmds = []
         if parent_runner:
-            self.cmd = self.parent_cmd + self.cmd
+            self.cmds = parent_runner.cmds
+        if cmd:
+            self.cmds.append(make_cmd(cmd))
 
     def setup_cmd(self, cmd):
         return cmd
+
+    def chain(self, cmd):
+        self.cmds.append(make_cmd(cmd))
+        return self
 
     def __enter__(self):
         return self
     
     def run(self, cmd, *args, **kwargs):
-        cmd = self.cmd + make_cmd(cmd)
+        cmd = [c for m in self.cmds for c in m] + make_cmd(cmd)
         return run_cmd(cmd, *args, **kwargs)
 
     def __exit__(self, exc_type, exc_value, exc_tb):
-        self.cmd = self.parent_cmd
+        self.cmds.pop()
 
-class ssh(cmd):
-    def setup_cmd(self, cmd):
-        return f"ssh {cmd} --"
+    def ssh(self, hostname):
+        return self.chain(f"ssh {hostname} --")
+
+    def cd(self, dir):
+        return self.chain(f"cd {dir} &&")
