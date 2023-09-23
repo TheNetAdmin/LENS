@@ -86,30 +86,28 @@ def run_cmd_script(cmds, script="lens_script.sh", *args, **kwargs):
     finally:
         script.unlink()
 
-class __runner(object):
+
+class cmd(object):
     def __init__(self, cmd, parent_runner = None) -> None:
-        self.cmd = make_cmd(cmd)
+        self.cmd = make_cmd(self.setup_cmd(cmd))
         self.parent_cmd = parent_runner.cmd if parent_runner else []
 
         if parent_runner:
             self.cmd = self.parent_cmd + self.cmd
+
+    def setup_cmd(self, cmd):
+        return cmd
+
+    def __enter__(self):
+        return self
     
-    def run_cmd(self, cmd, *args, **kwargs):
+    def run(self, cmd, *args, **kwargs):
         cmd = self.cmd + make_cmd(cmd)
         return run_cmd(cmd, *args, **kwargs)
 
-    def reset(self):
+    def __exit__(self, exc_type, exc_value, exc_tb):
         self.cmd = self.parent_cmd
 
-@contextmanager
-def runner(cmd, *args, **kwargs):
-    r = __runner(cmd, *args, **kwargs)
-    yield r
-    r.reset()
-
-@contextmanager
-def ssh(hostname, *args, **kwargs):
-    ssh_cmd = f"ssh {hostname} --"
-    r = __runner(ssh_cmd, *args, **kwargs)
-    yield r
-    r.reset()
+class ssh(cmd):
+    def setup_cmd(self, cmd):
+        return f"ssh {cmd} --"
