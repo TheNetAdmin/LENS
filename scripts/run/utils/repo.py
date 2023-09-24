@@ -22,3 +22,7 @@ def commit_and_push():
             commit_msg = f"Auto commit [{curr_time()}]"
             c(["commit", "-am", f'"{commit_msg}"'])
             c("push")
+
+def pull(remote_host, remote_dir):
+    with Cmd().ssh(remote_host).cd(remote_dir) as c:
+            c("git pull")

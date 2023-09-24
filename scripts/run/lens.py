@@ -42,15 +42,13 @@ def run(ctx):
 def sync(ctx, dir):
     logger.info("Sync repo: [local] git push, [remote] git pull")
 
-    logger.info("Push local repo")
+    logger.info("Localhost: Push repo")
     repo.commit_and_push()
-
-    logger.info("Check local repo status")
     repo.status()
 
-    logger.info("Check remote repo status")
+    logger.info("Remotehost: Pull repo")
+    repo.pull(ctx.obj["host"], dir)
     repo.status(ctx.obj["host"], dir)
-
 
 
 @lens.command()
