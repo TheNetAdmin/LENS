@@ -1,9 +1,11 @@
-import subprocess
-from loguru import logger
-from contextlib import contextmanager
 import os
-from pathlib import Path
+import subprocess
+from contextlib import contextmanager
+from datetime import datetime
 from enum import Enum
+from pathlib import Path
+
+from loguru import logger
 
 
 @contextmanager
@@ -26,7 +28,10 @@ def __run_cmd(cmd, *args, **kwargs):
 
 
 def make_cmd(cmd):
-    return cmd.split(" ")
+    if isinstance(cmd, list):
+        return cmd
+    else:
+        return cmd.split(" ")
 
 
 class cmd_fail(Enum):
@@ -110,13 +115,17 @@ class Cmd(object):
         return run_cmd(cmd, *args, **kwargs)
 
     def __exit__(self, exc_type, exc_value, exc_tb):
-        self.cmds.pop()
+        if len(self.cmds) > 0:
+            self.cmds.pop()
 
     def __call__(self, *args, **kwargs):
-        self.run(*args, **kwargs)
+        return self.run(*args, **kwargs)
 
     def ssh(self, hostname):
         return self.chain(f"ssh {hostname} --")
 
     def cd(self, dir):
         return self.chain(f"cd {dir} &&")
+
+def curr_time():
+    return datetime.now().strftime("%Y-%m-%d-%H-%M-%S")

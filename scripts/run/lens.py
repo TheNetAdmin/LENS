@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 import click
+import utils.repo as repo
 from config.config import config
 from loguru import logger
 from utils.logging import setup_logger
@@ -8,10 +9,12 @@ from utils.utils import Cmd
 
 
 @click.group()
+@click.option("--host", help="Remote hostname", default="netserver")
 @click.pass_context
-def lens(ctx):
+def lens(ctx, host):
     ctx.ensure_object(dict)
     ctx.obj["config"] = config
+    ctx.obj["host"] = host
     logger.info("Launching a LENS job")
 
 
@@ -31,6 +34,23 @@ def umount(ctx):
 @click.pass_context
 def run(ctx):
     pass
+
+
+@lens.command()
+@click.option("--dir", help="Remote repo dir", default="$HOME/code/generic-lens")
+@click.pass_context
+def sync(ctx, dir):
+    logger.info("Sync repo: [local] git push, [remote] git pull")
+
+    logger.info("Check local repo status")
+    repo.status()
+
+    logger.info("Push local repo")
+    repo.commit_and_push()
+
+    logger.info("Check remote repo status")
+    repo.status(ctx.obj["host"], dir)
+
 
 
 @lens.command()
