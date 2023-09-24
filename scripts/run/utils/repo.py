@@ -15,7 +15,7 @@ def commit_and_push():
     with Cmd("git") as c:
         c("add *")
         res = c("diff-index HEAD --", capture_output=True, text=True)
-        num_diff_files = len(res.stdout.split("\n"))
+        num_diff_files = len(res.stdout.strip().split("\n"))
 
         if num_diff_files > 0:
             logger.info(f"{num_diff_files} files modified, needs commit and push")
