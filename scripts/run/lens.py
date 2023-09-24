@@ -42,11 +42,11 @@ def run(ctx):
 def sync(ctx, dir):
     logger.info("Sync repo: [local] git push, [remote] git pull")
 
-    logger.info("Check local repo status")
-    repo.status()
-
     logger.info("Push local repo")
     repo.commit_and_push()
+
+    logger.info("Check local repo status")
+    repo.status()
 
     logger.info("Check remote repo status")
     repo.status(ctx.obj["host"], dir)
