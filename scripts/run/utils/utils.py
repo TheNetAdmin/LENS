@@ -87,7 +87,7 @@ def run_cmd_script(cmds, script="lens_script.sh", *args, **kwargs):
         script.unlink()
 
 
-class cmd(object):
+class Cmd(object):
     def __init__(self, cmd = None, parent_runner = None) -> None:
         self.cmds = []
         if parent_runner:
@@ -111,6 +111,9 @@ class cmd(object):
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         self.cmds.pop()
+
+    def __call__(self, *args, **kwargs):
+        self.run(*args, **kwargs)
 
     def ssh(self, hostname):
         return self.chain(f"ssh {hostname} --")

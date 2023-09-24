@@ -4,7 +4,7 @@ from config.config import config
 from loguru import logger
 from utils.logging import setup_logger
 from utils.mount import mount_kernel_modules
-from utils.utils import cmd
+from utils.utils import Cmd
 
 
 @click.group()
@@ -37,13 +37,13 @@ def run(ctx):
 @click.pass_context
 def test(ctx):
     logger.info("This is a testing message")
-    with cmd().ssh("netserver") as r:
-        with r.cd("$HOME/code"):
-            r.run("pwd")
-        with r.cd("$HOME/code"):
-            r.run("pwd")
-            r.run("ls")
-        r.run("pwd")
+    with Cmd().ssh("netserver") as c:
+        with c.cd("$HOME/code"):
+            c("pwd")
+        with c.cd("$HOME/code"):
+            c("pwd")
+            c("ls")
+        c("pwd")
 
 
 if __name__ == "__main__":
