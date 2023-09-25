@@ -5,16 +5,18 @@ from config.config import config
 from loguru import logger
 from utils.logging import setup_logger
 from utils.mount import mount_kernel_modules
-from utils.utils import Cmd
+from utils.utils import Cmd, run_cmd
 
 
 @click.group()
 @click.option("--host", help="Remote hostname", default="netserver")
+@click.option("--remote_dir", help="Remote repo dir", default="$HOME/code/generic-lens")
 @click.pass_context
-def lens(ctx, host):
+def lens(ctx, host, remote_dir):
     ctx.ensure_object(dict)
     ctx.obj["config"] = config
     ctx.obj["host"] = host
+    ctx.obj['remote_dir'] = remote_dir
     logger.info("Launching a LENS job")
 
 
@@ -35,11 +37,24 @@ def umount(ctx):
 def run(ctx):
     pass
 
+@lens.command(context_settings=dict(
+    ignore_unknown_options=True,
+))
+@click.pass_context
+@click.argument('remote_lens_args', nargs=-1, type=click.UNPROCESSED)
+def remote(ctx, remote_lens_args):
+    ctx.invoke(sync)
+    # ctx.forward(sync)
+    with Cmd().ssh(ctx.obj['host']).cd(ctx.obj['remote_dir']) as c:
+        c.chain(". ~/.bashrc ;")
+        c.chain("conda activate lens && ")
+        c.run(["./scripts/run/lens.py"] + list(remote_lens_args))
+
 
 @lens.command()
-@click.option("--dir", help="Remote repo dir", default="$HOME/code/generic-lens")
 @click.pass_context
-def sync(ctx, dir):
+def sync(ctx):
+    # TODO: make the auto update to a separate branch, and periodically merge back to the main branch
     logger.info("Sync repo: [local] git push, [remote] git pull")
 
     logger.info("Localhost: Push repo")
@@ -47,15 +62,19 @@ def sync(ctx, dir):
     repo.status()
 
     logger.info("Remotehost: Pull repo")
-    repo.pull(ctx.obj["host"], dir)
-    repo.status(ctx.obj["host"], dir)
+    repo.pull(ctx.obj["host"], ctx.obj['remote_dir'])
+    repo.status(ctx.obj["host"], ctx.obj['remote_dir'])
 
 
 @lens.command()
 @click.pass_context
 def test(ctx):
-    logger.info("This is a testing message")
-    with Cmd().ssh("netserver") as c:
+    logger.info("Testing message")
+    run_cmd("cd $HOME && pwd")
+    a = Cmd().cd("$HOME").chain("pwd")
+    a.print( )
+    a.run()
+    with Cmd() as c:
         with c.cd("$HOME/code"):
             c("pwd")
         with c.cd("$HOME/code"):

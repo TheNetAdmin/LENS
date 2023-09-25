@@ -45,6 +45,7 @@ def run_cmd(
     comment=None,
     check=True,
     on_cmd_fail=cmd_fail.capture_and_exit,
+    pretty_print_exception=False,
     *args,
     **kwargs,
 ):
@@ -71,7 +72,8 @@ def run_cmd(
     except subprocess.CalledProcessError as e:
         match on_cmd_fail:
             case cmd_fail.capture_and_exit:
-                logger.exception(e)
+                if pretty_print_exception:
+                    logger.exception(e)
                 exit(e.returncode)
             case cmd_fail.raise_exception:
                 raise e
@@ -110,9 +112,14 @@ class Cmd(object):
     def __enter__(self):
         return self
     
-    def run(self, cmd, *args, **kwargs):
-        cmd = [c for m in self.cmds for c in m] + make_cmd(cmd)
-        return run_cmd(cmd, *args, **kwargs)
+    def run(self, cmd = None, *args, **kwargs):
+        cmd_to_run = [c for m in self.cmds for c in m]
+        if cmd:
+            cmd_to_run += make_cmd(cmd)
+        return run_cmd(cmd_to_run, *args, **kwargs)
+
+    def print(self):
+        logger.info(f"cmd: {self.cmds}")
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         if len(self.cmds) > 0:
