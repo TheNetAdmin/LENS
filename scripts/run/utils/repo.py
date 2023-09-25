@@ -15,6 +15,7 @@ def commit_and_push():
     with Cmd("git") as c:
         c("add *")
         res = c("diff-index HEAD --", capture_output=True, text=True)
+        print(res.stdout)
         num_diff_files = len(res.stdout.strip().split("\n"))
 
         if num_diff_files > 0:
