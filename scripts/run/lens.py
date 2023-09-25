@@ -44,7 +44,8 @@ def run(ctx):
 @click.argument('remote_lens_args', nargs=-1, type=click.UNPROCESSED)
 def remote(ctx, remote_lens_args):
     ctx.invoke(sync)
-    # ctx.forward(sync)
+
+    logger.info("Execute command on remote host")
     with Cmd().ssh(ctx.obj['host']).cd(ctx.obj['remote_dir']) as c:
         c.chain(". ~/.bashrc ;")
         c.chain("conda activate lens && ")
@@ -70,16 +71,7 @@ def sync(ctx):
 @click.pass_context
 def test(ctx):
     logger.info("Testing message")
-    run_cmd("cd $HOME && pwd")
-    a = Cmd().cd("$HOME").chain("pwd")
-    a.print( )
-    a.run()
     with Cmd() as c:
-        with c.cd("$HOME/code"):
-            c("pwd")
-        with c.cd("$HOME/code"):
-            c("pwd")
-            c("ls")
         c("pwd")
 
 
