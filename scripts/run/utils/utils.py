@@ -23,8 +23,11 @@ def chdir(path, mkdir=False):
         os.chdir(origin)
 
 
-def __run_cmd(cmd, *args, **kwargs):
-    return subprocess.run(cmd, *args, **kwargs)
+def __run_cmd(cmd, popen=False, *args, **kwargs):
+    if popen:
+        return subprocess.popen(cmd, *args, **kwargs)
+    else:
+        return subprocess.run(cmd, *args, **kwargs)
 
 
 def make_cmd(cmd):
@@ -46,6 +49,7 @@ def run_cmd(
     check=True,
     on_cmd_fail=cmd_fail.capture_and_exit,
     pretty_print_exception=False,
+    popen=False,
     *args,
     **kwargs,
 ):
@@ -54,7 +58,8 @@ def run_cmd(
         assert script
         cmd = f"bash {script}"
 
-    if type(cmd) is not list:
+    # popen accepts cmd as a single string
+    if not popen and not type(cmd) is list:
         cmd = make_cmd(cmd)
 
     # Print
@@ -64,11 +69,12 @@ def run_cmd(
                 logger.log("SCRIPT", f"    {line.rstrip()}")
 
     comment = f"# {comment}" if comment else ""
-    logger.log("CMD", " ".join(cmd) + comment)
+    cmd_print = cmd if popen else " ".join(cmd)
+    logger.log("CMD", cmd_print + comment)
 
     # Execute
     try:
-        return __run_cmd(cmd, check=check, *args, **kwargs)
+        return __run_cmd(cmd, popen=popen, check=check, *args, **kwargs)
     except subprocess.CalledProcessError as e:
         match on_cmd_fail:
             case cmd_fail.capture_and_exit:

@@ -4,19 +4,22 @@ import os
 import subprocess
 from .utils import run_cmd
 
-def _build_modules(config):
+def build_modules(config):
     with chdir("src"):
         logger.info(f"Src dir: {os.getcwd()}")
 
-        cmd = 'sudo bash -c "echo 0 > /proc/sys/kernel/soft_watchdog"'
-        logger.info(f"Hard lock watchdog at nmi_watchdog: '{cmd}'")
-        subprocess.Popen(cmd, shell=True)
-
         logger.info("Compiling")
-        run_cmd(f"make -j {os.cpu_count()}", check_output=True)
+        run_cmd(f"make -j {os.cpu_count()}")
 
 
-def mount_kernel_modules(config):
+def mount_modules(config):
+    with chdir("src"):
+        cmd = 'sudo bash -c "echo 0 > /proc/sys/kernel/soft_watchdog"'
+        run_cmd(cmd, popen=True, shell=True, comment="Hard lock watchdog at nmi_watchdog")
+
+
+def setup_kernel_modules(config):
     logger.info("Building the kernel module")
-    _build_modules(config)
+    build_modules(config)
+
     logger.info("Mounting the kernel module")

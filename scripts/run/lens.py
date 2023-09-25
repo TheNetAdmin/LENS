@@ -4,7 +4,7 @@ import utils.repo as repo
 from config.config import config
 from loguru import logger
 from utils.logging import setup_logger
-from utils.mount import mount_kernel_modules
+from utils.mount import setup_kernel_modules
 from utils.utils import Cmd, run_cmd
 
 
@@ -22,13 +22,13 @@ def lens(ctx, host, remote_dir):
 
 @lens.command()
 @click.pass_context
-def mount(ctx):
-    mount_kernel_modules(ctx.obj["config"])
+def setup(ctx):
+    setup_kernel_modules(ctx.obj["config"])
 
 
 @lens.command()
 @click.pass_context
-def umount(ctx):
+def cleanup(ctx):
     pass
 
 
