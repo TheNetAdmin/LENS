@@ -134,5 +134,9 @@ class Cmd(object):
     def cd(self, dir):
         return self.chain(f"cd {dir} &&")
 
+    def conda(self, name):
+        return self.chain(f". ~/.bashrc ; conda activate {name} &&")
+
+
 def curr_time():
     return datetime.now().strftime("%Y-%m-%d-%H-%M-%S")

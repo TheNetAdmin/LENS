@@ -47,8 +47,7 @@ def remote(ctx, remote_lens_args):
 
     logger.info("Execute command on remote host")
     with Cmd().ssh(ctx.obj['host']).cd(ctx.obj['remote_dir']) as c:
-        c.chain(". ~/.bashrc ;")
-        c.chain("conda activate lens && ")
+        c.conda("lens")
         c.run(["./scripts/run/lens.py"] + list(remote_lens_args))
 
 
