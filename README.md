@@ -1,4 +1,4 @@
-# LENS: A Low-level NVRAM Profiler
+# LENS: A Low-level Heterogeneous Memory Profiler
 
 LENS is a low-level non-volatile memory profiler, which is built based on [LATTester](https://github.com/NVSL/OptaneStudy).
 
