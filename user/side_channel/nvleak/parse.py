@@ -32,23 +32,23 @@ def parse():
     df = pd.DataFrame(res)
     meds = [0 for _ in range(256)]
     for s in range(256):
-        meds[s] = df.loc[df["set"] == s]['lat'].median()
+        meds[s] = df.loc[df["set"] == s]["lat"].median()
     summary = []
 
     # slt: suggested_lat_threshold
-    slt=[float('inf'), -float('inf')]
-    sltm=[float('inf'), -float('inf')]
+    slt = [float("inf"), -float("inf")]
+    sltm = [float("inf"), -float("inf")]
     for d in res:
         m = meds[d["set"]]
         d["set_median"] = m
         d["over_median"] = 1 if d["lat"] > m else 0
         d["frac_median"] = d["lat"] / m
         summary.append(d)
-        if d['iter'] == d['set'] and d['lat'] < 1200:
-            slt[0] = min(slt[0], d['lat'])
-            slt[1] = max(slt[1], d['lat'])
-            sltm[0] = min(sltm[0], d['frac_median'])
-            sltm[1] = max(sltm[1], d['frac_median'])
+        if d["iter"] == d["set"] and d["lat"] < 1200:
+            slt[0] = min(slt[0], d["lat"])
+            slt[1] = max(slt[1], d["lat"])
+            sltm[0] = min(sltm[0], d["frac_median"])
+            sltm[1] = max(sltm[1], d["frac_median"])
     with open("summary.csv", "w") as f:
         writer = csv.DictWriter(f, fieldnames=summary[0].keys())
         writer.writeheader()

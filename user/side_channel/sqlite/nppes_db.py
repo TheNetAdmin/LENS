@@ -24,11 +24,16 @@ def gen_db():
     default="../data/nppes_npi/npidata_pfile_20050523-20220508.csv",
 )
 @click.option(
-    "-o", "--out_sqlite_file", required=True, default="../data/nppes_npi/npi_data_basic.db"
+    "-o",
+    "--out_sqlite_file",
+    required=True,
+    default="../data/nppes_npi/npi_data_basic.db",
 )
 def gen_sqlite_basic(data_file, out_sqlite_file):
     if Path(out_sqlite_file).exists():
-        raise FileExistsError(f"File [{out_sqlite_file}] exists, please delete it first")
+        raise FileExistsError(
+            f"File [{out_sqlite_file}] exists, please delete it first"
+        )
 
     conn = sqlite3.connect(out_sqlite_file)
     c = conn.cursor()
@@ -99,7 +104,10 @@ def convert_date(orig_date):
     default="../data/nppes_npi/npidata_pfile_20050523-20220508.csv",
 )
 @click.option(
-    "-o", "--out_sqlite_file", required=True, default="../data/nppes_npi/npi_data_ranged.db"
+    "-o",
+    "--out_sqlite_file",
+    required=True,
+    default="../data/nppes_npi/npi_data_ranged.db",
 )
 def gen_sqlite_ranged(data_file, out_sqlite_file):
     conn = sqlite3.connect(out_sqlite_file)
@@ -155,6 +163,7 @@ def gen_sqlite_ranged(data_file, out_sqlite_file):
 
     conn.close()
 
+
 @gen_db.command()
 @click.option(
     "-d",
@@ -166,7 +175,6 @@ def gen_sqlite_ranged(data_file, out_sqlite_file):
     "-o", "--out_db_file", required=True, default="../data/redis/npi_id_name.db"
 )
 def gen_redis_id_name(data_file, out_db_file):
-    
     ignored_lines = 0
     id_name = []
 
@@ -190,9 +198,9 @@ def gen_redis_id_name(data_file, out_db_file):
     logging.info(f"To be inserted: {len(id_name)}")
     logging.info(f"Ignored       : {ignored_lines}")
 
-    with open(out_db_file, 'w') as f:
+    with open(out_db_file, "w") as f:
         for data in id_name:
-            f.write(f"set {data[0]} \"{data[1]}\"\n")
+            f.write(f'set {data[0]} "{data[1]}"\n')
         f.write("save\n")
 
 

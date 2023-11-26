@@ -2,15 +2,17 @@ import click
 import random
 import struct
 
+
 def gen_byte(pattern: int) -> int:
     if pattern == 0:
-        return 0xaa
+        return 0xAA
     elif pattern == 1:
-        return 0xcc
+        return 0xCC
     elif pattern == 2:
-        return 0xf0
+        return 0xF0
     elif pattern == 3:
-        return random.randint(0x00, 0xff)
+        return random.randint(0x00, 0xFF)
+
 
 def gen_64bit(pattern: int) -> int:
     d = 0
@@ -18,10 +20,11 @@ def gen_64bit(pattern: int) -> int:
         d |= gen_byte(pattern) << (i * 8)
     return d
 
+
 @click.command()
 @click.option("-b", "--total_bits", required=True, default=64)
 @click.option("-o", "--output_file", required=True)
-@click.option('-p', '--pattern', required=True, type=int)
+@click.option("-p", "--pattern", required=True, type=int)
 def gen_pattern(total_bits, output_file, pattern):
     """
     Pattern:
@@ -31,21 +34,21 @@ def gen_pattern(total_bits, output_file, pattern):
         3: random
     """
 
-    assert(total_bits >= 64)
-    assert(total_bits % 64 == 0)
-    assert(0 <= pattern <= 3)
+    assert total_bits >= 64
+    assert total_bits % 64 == 0
+    assert 0 <= pattern <= 3
     data = []
     # Setup stage
-    setup_data = 0xcc # First 8 bits are for setup, always 0xcc
+    setup_data = 0xCC  # First 8 bits are for setup, always 0xcc
     for i in range(7):
         setup_data |= gen_byte(pattern) << ((i + 1) * 8)
     data.append(setup_data)
     for _ in range(total_bits // 64 - 1):
         data.append(gen_64bit(pattern))
-    
-    with open(output_file, 'wb') as f:
+
+    with open(output_file, "wb") as f:
         for d in data:
-            b = struct.pack('Q', d)
+            b = struct.pack("Q", d)
             f.write(b)
 
 

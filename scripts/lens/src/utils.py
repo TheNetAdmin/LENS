@@ -68,6 +68,10 @@ def run_cmd(
             for line in f:
                 logger.log("SCRIPT", f"    {line.rstrip()}")
 
+    if isinstance(cmd, list) and cmd[-1] == "&&":
+        logger.debug("Remove tailing &&")
+        cmd.pop()
+
     comment = f"# {comment}" if comment else ""
     cmd_print = cmd if popen else " ".join(cmd)
     logger.log("CMD", cmd_print + comment)
@@ -146,8 +150,9 @@ class Cmd(object):
     def mkdir(self, path):
         return self.chain(f"mkdir -p {path} &&")
 
-    def sudo(self, cmd):
-        return self.chain(f"sudo {cmd}")
+    def sudo(self, cmd=""):
+        return self.chain(f"sudo {cmd}".rstrip())
+
 
 def curr_time():
     return datetime.now().strftime("%Y-%m-%d-%H-%M-%S")

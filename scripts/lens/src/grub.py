@@ -1,13 +1,22 @@
 from .utils import Cmd, run_cmd, curr_time, chdir
 from loguru import logger
+from pathlib import Path
 import platform
 
 
+def wrap_grub_config(grub):
+    assert isinstance(grub, list)
+    grub = ["### LENS grub start"] + grub + ["### LENS grub end"]
+
+
 def __setup_netserver():
-    pass
-    # logger.info("Writing grub config")
-    # with open(grub_file, 'w') as f:
-    #     pass
+    config = [
+        'GRUB_CMDLINE_LINUX="nokaslr memmap=16G!16G memmap=16G!48G log-buf-len=1G mitigations=off"'
+    ]
+    config = wrap_grub_config(config)
+    logger.info(f"Writing grub config:\n{config}")
+    with open(grub_file, "a") as f:
+        pass
 
 
 grub_setup = {
@@ -15,14 +24,15 @@ grub_setup = {
     "lab-pc": __setup_netserver,
 }
 
-grub_file = "/etc/default/grub"
-grub_backup_dir = "/etc/default/grub_backup"
+grub_file = Path("/etc/default/grub")
+grub_backup_dir = Path("/etc/default/grub_backup")
+
 
 def backup():
     logger.info("Backing up grub config")
     Cmd().sudo().mkdir(grub_backup_dir).run()
 
-    backup_file = f'{curr_time()}.grub'
+    backup_file = grub_backup_dir / f"{curr_time()}.grub"
     Cmd().sudo().run(f"cp {grub_file} {backup_file}")
 
 
