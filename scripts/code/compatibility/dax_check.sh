@@ -24,12 +24,6 @@ function check_prev_4_17_6() {
 	}
 	EOF
 
-	cat <<- EOF >Makefile
-	obj-m += ${check_api}.o
-	all:
-		\${MAKE} -C "/lib/modules/$(uname -r)/build" M="$(pwd)"
-	EOF
-
 	make >make.log 2>&1
 
 	if [ -f "${check_api}.o" ]; then
@@ -78,12 +72,6 @@ function check_post_4_17_6() {
 	}
 	EOF
 
-	cat <<- EOF >Makefile
-	obj-m += ${check_api}.o
-	all:
-		\${MAKE} -C "/lib/modules/$(uname -r)/build" M="$(pwd)"
-	EOF
-
 	make >make.log 2>&1
 
 	if [ -f "${check_api}.o" ]; then
@@ -120,10 +108,118 @@ function post_4_17_6() {
 	fi
 }
 
+function check_post_5_15() {
+	cat <<- EOF > "${check_api}.c"
+	#include <linux/fs.h>
+	#include <linux/dax.h>
+
+	int main(void)
+	{
+		struct super_block *sb;
+		struct dax_device *dax_dev = fs_dax_get_by_bdev(sb->s_bdev);
+		return dax_supported(dax_dev, sb->s_bdev, 4096, 0, bdev_nr_sectors(sb->s_bdev));
+	}
+	EOF
+
+	make >make.log 2>&1
+
+	if [ -f "${check_api}.o" ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+function generate_post_5_15() {
+	mkdir -p "${output_root}"
+	echo "Linux >= 5.15"
+	cat <<- EOF > "${output_root}/${check_api}.h"
+		#ifndef LENS_DAX_CHECK_H
+		#define LENS_DAX_CHECK_H
+		#include <linux/fs.h>
+		#include <linux/dax.h>
+
+		static inline int check_dax(struct super_block *sb, int blocksize)
+		{
+			return !bdev_dax_supported(fs_dax_get_by_bdev(sb->s_bdev), sb->s_bdev, blocksize, 0, bdev_nr_sectors(sb->s_bdev));
+		}
+
+		#endif  /* LENS_DAX_CHECK_H */
+	EOF
+}
+
+function post_5_15() {
+	if check_post_5_15; then
+		generate_post_5_15
+		return 0
+	else
+		return 1
+	fi
+}
+
+function check_post_6_0() {
+	cat <<- EOF > "${check_api}.c"
+	#include <linux/fs.h>
+	#include <linux/dax.h>
+
+	int main(void)
+	{
+		struct super_block *sb;
+		u64 offset;
+		struct dax_device *dax_dev = fs_dax_get_by_bdev(sb->s_bdev, &offset, NULL, NULL);
+		return 0;
+	}
+	EOF
+
+	make >make.log 2>&1
+
+	if [ -f "${check_api}.o" ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+function generate_post_6_0() {
+	mkdir -p "${output_root}"
+	echo "Linux >= 6.0"
+	cat <<- EOF > "${output_root}/${check_api}.h"
+		#ifndef LENS_DAX_CHECK_H
+		#define LENS_DAX_CHECK_H
+		#include <linux/fs.h>
+		#include <linux/dax.h>
+
+		static inline int check_dax(struct super_block *sb, int blocksize)
+		{
+			u64 offset;
+			return !fs_dax_get_by_bdev(sb->s_bdev, &offset, NULL, NULL);
+		}
+
+		#endif  /* LENS_DAX_CHECK_H */
+	EOF
+}
+
+function post_6_0() {
+	if check_post_6_0; then
+		generate_post_6_0
+		return 0
+	else
+		return 1
+	fi
+}
+
 pushd "${check_dir}" >/dev/null || exit 2
+
+cat << EOF >Makefile
+obj-m += ${check_api}.o
+all:
+	\${MAKE} -C "/lib/modules/$(uname -r)/build" M="$(pwd)"
+EOF
 
 prev_4_17_6 || \
 post_4_17_6 || \
+post_5_15   || \
+post_6_0    || \
 (echo "Not compatible" && exit 2)
 
 popd >/dev/null || exit 2
