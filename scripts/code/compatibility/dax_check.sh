@@ -12,39 +12,35 @@ echo -n "Check compatibility [${check_api}]: "
 rm -rf "${check_dir}"
 mkdir -p "${check_dir}"
 
-pushd "${check_dir}" >/dev/null || exit 2
+function check_prev_4_17_6() {
+	cat <<- EOF > "${check_api}.c"
+	#include <linux/fs.h>
+	#include <linux/dax.h>
 
-cat << EOF >"${check_api}.c"
-#include <linux/fs.h>
-#include <linux/dax.h>
+	int main(void)
+	{
+		struct super_block *sb;
+		return bdev_dax_supported(sb, 4096);
+	}
+	EOF
 
-int main(void)
-{
-	struct super_block *sb;
-	return bdev_dax_supported(sb, 4096);
+	cat <<- EOF >Makefile
+	obj-m += ${check_api}.o
+	all:
+		\${MAKE} -C "/lib/modules/$(uname -r)/build" M="$(pwd)"
+	EOF
+
+	make >make.log 2>&1
+
+	if [ -f "${check_api}.o" ]; then
+		return 0
+	else
+		return 1
+	fi
 }
-EOF
 
-cat << EOF >Makefile
-obj-m += ${check_api}.o
-all:
-	\${MAKE} -C "/lib/modules/$(uname -r)/build" M="$(pwd)"
-EOF
-
-make >make.log 2>&1
-
-## Check if obj file is generated
-compatible=n
-if [ -f "${check_api}.o" ]; then
-	compatible=y
-fi
-
-popd >/dev/null || exit 2
-
-mkdir -p "${output_root}"
-
-if [ ${compatible} == "y" ]; then
-	# Old style, introduced before kernel v4.17.6
+function generate_prev_4_17_6() {
+	mkdir -p "${output_root}"
 	echo "Linux < 4.17.6"
 	cat <<- EOF > "${output_root}/${check_api}.h"
 		#ifndef LENS_DAX_CHECK_H
@@ -59,8 +55,46 @@ if [ ${compatible} == "y" ]; then
 
 		#endif  /* LENS_DAX_CHECK_H */
 	EOF
-else
-	# New style, introduced by kernel v4.17.6
+}
+
+function prev_4_17_6() {
+	if check_prev_4_17_6; then
+		generate_prev_4_17_6
+		return 0
+	else
+		return 1
+	fi
+}
+
+function check_post_4_17_6() {
+	cat <<- EOF > "${check_api}.c"
+	#include <linux/fs.h>
+	#include <linux/dax.h>
+
+	int main(void)
+	{
+		struct super_block *sb;
+		return bdev_dax_supported(sb->s_bdev, 4096);
+	}
+	EOF
+
+	cat <<- EOF >Makefile
+	obj-m += ${check_api}.o
+	all:
+		\${MAKE} -C "/lib/modules/$(uname -r)/build" M="$(pwd)"
+	EOF
+
+	make >make.log 2>&1
+
+	if [ -f "${check_api}.o" ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+function generate_post_4_17_6() {
+	mkdir -p "${output_root}"
 	echo "Linux >= 4.17.6"
 	cat <<- EOF > "${output_root}/${check_api}.h"
 		#ifndef LENS_DAX_CHECK_H
@@ -75,4 +109,25 @@ else
 
 		#endif  /* LENS_DAX_CHECK_H */
 	EOF
-fi
+}
+
+function post_4_17_6() {
+	if check_post_4_17_6; then
+		generate_post_4_17_6
+		return 0
+	else
+		return 1
+	fi
+}
+
+pushd "${check_dir}" >/dev/null || exit 2
+
+prev_4_17_6 || \
+post_4_17_6 || \
+(echo "Not compatible" && exit 2)
+
+popd >/dev/null || exit 2
+
+
+# bdev_dax_supported is depricated starting from v5.15
+# https://github.com/torvalds/linux/commit/bdd3c50d83bf7f6acc869b48d02670d19030ae03

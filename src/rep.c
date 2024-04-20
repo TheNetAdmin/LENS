@@ -26,7 +26,7 @@
 #include <linux/vfs.h>
 #include <linux/fs.h>
 #include <linux/uaccess.h>
-#include <linux/genhd.h>
+// #include <linux/genhd.h>
 #include <linux/blkdev.h>
 #include <linux/io.h>
 #include <linux/seq_file.h>
