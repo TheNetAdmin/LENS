@@ -42,6 +42,7 @@
 #include <linux/dax.h>
 #include <linux/version.h>
 
+#include "rep.h"
 #include "lat.h"
 
 int support_clwb                       = 0;
@@ -60,7 +61,7 @@ static inline bool arch_has_clwb(void)
 	return static_cpu_has(X86_FEATURE_CLWB);
 }
 
-static struct report_sbi *reportfs_get_sbi(void)
+struct report_sbi *reportfs_get_sbi(void)
 {
 	return g_report_sbi;
 }

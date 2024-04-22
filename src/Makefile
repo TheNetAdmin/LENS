@@ -52,7 +52,6 @@ endif
 ccflags-y+= -DFENCE_MFENCE ${LENS_MAKE_ARGS}
 
 kernel_version=$(shell uname -r)
-# kernel_version="4.13.0appdirect+"
 
 # Supress some warnings
 # TODO: fix the warnings at source code level, and re-enable these warnings

@@ -1258,7 +1258,7 @@ void cachefence(char *start_addr, long size, long cache, long fence)
 	return;
 }
 
-void cacheprobe(char *start_addr, char *end_addr, long stride)
+static void cacheprobe(char *start_addr, char *end_addr, long stride)
 {
 	KERNEL_BEGIN
 	asm volatile (
@@ -1282,7 +1282,7 @@ void cacheprobe(char *start_addr, char *end_addr, long stride)
 	return;
 }
 
-void imcprobe(char *start_addr, char *end_addr, long loop)
+static void imcprobe(char *start_addr, char *end_addr, long loop)
 {
 	KERNEL_BEGIN
 	asm volatile (

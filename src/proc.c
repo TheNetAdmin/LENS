@@ -28,7 +28,7 @@
 struct proc_dir_entry *lens_proc;
 extern struct latency_sbi *global_sbi;
 
-
+/* clang-format off */
 static const struct lens_option lattest_opts[] =
 {
 	{"task",           OPT_INT,    'T'},
@@ -59,8 +59,9 @@ static const struct lens_option lattest_opts[] =
 	{"warm_up"        ,OPT_INT,    'W'},
 	{NULL             ,0      ,     0 }
 };
+/* clang-format on */
 
-void lens_parse_cmd(struct latency_sbi *sbi, char *cmd)
+static void lens_parse_cmd(struct latency_sbi *sbi, char *cmd)
 {
 	int op;
 	char *optarg;
@@ -71,33 +72,32 @@ void lens_parse_cmd(struct latency_sbi *sbi, char *cmd)
 	int ret       = 0;
 
 	/* Default args */
-	sbi->op		    = 0;
-	sbi->access_size    = 64;
-	sbi->strided_size   = 64; /* TODO: convert to "stride_size" */
-	sbi->pc_region_align= 64;
-	sbi->pc_region_size = 64;
-	sbi->pc_block_size  = 64;
-	sbi->runtime	    = 10;
-	sbi->bwsize_bit	    = 6;
-	sbi->delay	    = 0;
-	sbi->delay_per_byte = 0;
-	sbi->write_start    = 0;
-	sbi->write_size	    = 64;
-	sbi->clwb_rate	    = 64;
-	sbi->fence_rate	    = 64;
-	sbi->repeat	    = 1;
-	sbi->count	    = 1;
-	sbi->sync	    = 1;
-	sbi->sync_per_iter  = 1;
-	sbi->threshold_cycle= 0;
-	sbi->threshold_iter = 0;
-	sbi->align_mode	    = ALIGN_PERTHREAD;
-	sbi->align_size	    = PERTHREAD_WORKSET;
-	sbi->task           = -1;
-	sbi->warm_up        = 0;
+	sbi->op              = 0;
+	sbi->access_size     = 64;
+	sbi->strided_size    = 64; /* TODO: convert to "stride_size" */
+	sbi->pc_region_align = 64;
+	sbi->pc_region_size  = 64;
+	sbi->pc_block_size   = 64;
+	sbi->runtime         = 10;
+	sbi->bwsize_bit      = 6;
+	sbi->delay           = 0;
+	sbi->delay_per_byte  = 0;
+	sbi->write_start     = 0;
+	sbi->write_size      = 64;
+	sbi->clwb_rate       = 64;
+	sbi->fence_rate      = 64;
+	sbi->repeat          = 1;
+	sbi->count           = 1;
+	sbi->sync            = 1;
+	sbi->sync_per_iter   = 1;
+	sbi->threshold_cycle = 0;
+	sbi->threshold_iter  = 0;
+	sbi->align_mode      = ALIGN_PERTHREAD;
+	sbi->align_size      = PERTHREAD_WORKSET;
+	sbi->task            = -1;
+	sbi->warm_up         = 0;
 
-	while ((op = latencyfs_getopt("lens", &cmd, lattest_opts, NULL,
-				      &optarg, &optint)) != 0) {
+	while ((op = latencyfs_getopt("lens", &cmd, lattest_opts, NULL, &optarg, &optint)) != 0) {
 		switch (op) {
 		case 'T':
 			if (optint > 0 && optint < TASK_COUNT) {
@@ -117,15 +117,13 @@ void lens_parse_cmd(struct latency_sbi *sbi, char *cmd)
 			if (optint > 0 && optint < LFS_THREAD_MAX)
 				threads = optint;
 			else
-				pr_info("Ignore parameter: parallel = %ld\n",
-					optint);
+				pr_info("Ignore parameter: parallel = %ld\n", optint);
 			break;
 		case 't':
 			if (optint > 0 && optint < LFS_RUNTIME_MAX)
 				sbi->runtime = optint;
 			else
-				pr_info("Ignore parameter: runtime = %ld\n",
-					optint);
+				pr_info("Ignore parameter: runtime = %ld\n", optint);
 			break;
 		case 'm':
 			message = optarg;
@@ -134,129 +132,110 @@ void lens_parse_cmd(struct latency_sbi *sbi, char *cmd)
 			if (optint > 0 && optint <= LFS_ACCESS_MAX)
 				sbi->access_size = optint;
 			else
-				pr_info("Ignore parameter: access_size = %ld\n",
-					optint);
+				pr_info("Ignore parameter: access_size = %ld\n", optint);
 			break;
 		case 's':
 			if (optint >= 0 && optint <= LFS_ACCESS_MAX)
 				sbi->strided_size = optint;
 			else
-				pr_info("Ignore parameter: stride_size = %ld\n",
-					optint);
+				pr_info("Ignore parameter: stride_size = %ld\n", optint);
 			break;
 		case 'A':
 			if (optint >= 0 && optint <= LFS_ACCESS_MAX)
 				sbi->pc_region_align = optint;
 			else
-				pr_info("Ignore parameter: pc_region_align = %ld\n",
-					optint);
+				pr_info("Ignore parameter: pc_region_align = %ld\n", optint);
 			break;
 		case 'R':
 			if (optint >= 0 && optint <= LFS_ACCESS_MAX)
 				sbi->pc_region_size = optint;
 			else
-				pr_info("Ignore parameter: pc_region_size = %ld\n",
-					optint);
+				pr_info("Ignore parameter: pc_region_size = %ld\n", optint);
 			break;
 		case 'B':
 			if (optint >= 0 && optint <= LFS_ACCESS_MAX)
 				sbi->pc_block_size = optint;
 			else
-				pr_info("Ignore parameter: pc_block_size = %ld\n",
-					optint);
+				pr_info("Ignore parameter: pc_block_size = %ld\n", optint);
 			break;
 		case 'b':
-			if (optint >= CACHELINE_BITS &&
-			    optint <= LFS_ACCESS_MAX_BITS)
+			if (optint >= CACHELINE_BITS && optint <= LFS_ACCESS_MAX_BITS)
 				sbi->bwsize_bit = optint;
 			else
-				pr_info("Ignore parameter: bwsize_bit = %ld\n",
-					optint);
+				pr_info("Ignore parameter: bwsize_bit = %ld\n", optint);
 			break;
 		case 'd':
 			if (optint > 0 && optint <= LFS_DELAY_MAX)
 				sbi->delay = optint;
 			else
-				pr_info("Ignore parameter: delay = %lu\n",
-					optint);
+				pr_info("Ignore parameter: delay = %lu\n", optint);
 			break;
 		case 'e':
 			if (optint > 0 && optint <= LFS_ACCESS_MAX)
 				sbi->delay_per_byte = optint;
 			else
-				pr_info("Ignore parameter: delay_per_byte = %ld\n",
-					optint);
+				pr_info("Ignore parameter: delay_per_byte = %ld\n", optint);
 			break;
 		case 'w':
 			if (optint > 0 && optint < GLOBAL_WORKSET)
 				sbi->write_start = optint;
 			else
-				pr_info("Ignore parameter: write_start = %ld\n",
-					optint);
+				pr_info("Ignore parameter: write_start = %ld\n", optint);
 			break;
 		case 'z':
 			if (optint > 0 && optint < LFS_ACCESS_MAX)
 				sbi->write_size = optint;
 			else
-				pr_info("Ignore parameter: write_size = %ld\n",
-					optint);
+				pr_info("Ignore parameter: write_size = %ld\n", optint);
 			break;
 		case 'l':
 			if (optint >= 0 && optint < ALIGN_INVALID)
 				sbi->align_mode = optint;
 			else
-				pr_info("Ignore parameter: align_mode = %ld\n",
-					optint);
+				pr_info("Ignore parameter: align_mode = %ld\n", optint);
 			break;
 		case 'i':
 			if (optint >= 0 && optint < DIMM_SIZE)
 				sbi->align_size = optint;
 			else
-				pr_info("Ignore parameter: align_size = %lu\n",
-					optint);
+				pr_info("Ignore parameter: align_size = %lu\n", optint);
 			break;
 		case 'f':
 			if (optint > 0 && optint <= LFS_ACCESS_MAX)
 				sbi->fence_rate = optint;
 			else
-				pr_info("Ignore parameter: fence_rate = %ld\n",
-					optint);
+				pr_info("Ignore parameter: fence_rate = %ld\n", optint);
 			break;
 		case 'c':
 			if (optint > 0 && optint <= LFS_ACCESS_MAX)
 				sbi->clwb_rate = optint;
 			else
-				pr_info("Ignore parameter: clwb_rate = %ld\n",
-					optint);
+				pr_info("Ignore parameter: clwb_rate = %ld\n", optint);
 			break;
 		case 'r':
 			// 64GB (access size is 28)
 			if (optint >= 0 && optint <= (1ULL << 28))
 				sbi->repeat = optint;
 			else
-				pr_info("Ignore parameter: repeat = %ld\n",
-					optint);
+				pr_info("Ignore parameter: repeat = %ld\n", optint);
 			break;
 		case 'C':
 			if (optint > 0 && optint <= (1ULL << 28))
 				sbi->count = optint;
 			else
-				pr_info("Ignore parameter: count = %ld\n",
-					optint);
+				pr_info("Ignore parameter: count = %ld\n", optint);
 			break;
 		case 'y':
 			if (optint >= 0 && optint <= 1)
 				sbi->sync = optint;
 			else
-				pr_info("Ignore parameter: sync = %ld\n",
-					optint);
+				pr_info("Ignore parameter: sync = %ld\n", optint);
 			break;
 		case 'Y':
 			if (optint >= 0 && optint <= 1)
 				sbi->sync_per_iter = optint;
 			else
-				pr_info("Ignore parameter: sync_per_iter = %ld\n",
-					optint);
+				pr_info("Ignore parameter: sync_per_iter = %ld\n", optint);
 			if (sbi->sync_per_iter == 1) {
 				pr_info("Disabling sync per iteration\n");
 			}
@@ -305,8 +284,7 @@ void lens_parse_cmd(struct latency_sbi *sbi, char *cmd)
 	}
 
 	if (task == TASK_FLUSH_FIRST) {
-		if ((sbi->strided_size != 0) &&
-		    (sbi->strided_size < sbi->access_size)) {
+		if ((sbi->strided_size != 0) && (sbi->strided_size < sbi->access_size)) {
 			pr_info("Error: stride size (not 0) is smaller than access size.\n");
 			ret = -EINVAL;
 			goto out;
@@ -329,8 +307,7 @@ void lens_parse_cmd(struct latency_sbi *sbi, char *cmd)
 		}
 	}
 
-	if (task == TASK_PC_READ_AFTER_WRITE ||
-	    task == TASK_PC_READ_AND_WRITE || task == TASK_PC_WRITE) {
+	if (task == TASK_PC_READ_AFTER_WRITE || task == TASK_PC_READ_AND_WRITE || task == TASK_PC_WRITE) {
 		if (sbi->op != 0) {
 			/* TODO: Modify tasks.c to support back and forth */
 			pr_info("Error: op must be 0 or 1, but op=1 is not yet implemented.\n");
@@ -359,9 +336,7 @@ out:
 	pr_info("parse error: %d\n", ret);
 }
 
-static ssize_t lens_proc_write(struct file *file,
-				    const char __user *buffer, size_t count,
-				    loff_t *ppos)
+static ssize_t lens_proc_write(struct file *file, const char __user *buffer, size_t count, loff_t *ppos)
 {
 	char *cmdline;
 	int ret = 0;
