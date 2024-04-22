@@ -2,10 +2,10 @@
 
 ## Check bdev_dax_supported() compatibility and generate check function
 
-check_root="./.kernel_api_check"
+check_root="${PWD}/.kernel_api_check"
 check_api="dax_check"
 check_dir="${check_root}/${check_api}"
-output_root="./comp_utils/"
+output_root="${PWD}/comp_utils/"
 
 echo -n "Check compatibility [${check_api}]: "
 
@@ -183,6 +183,7 @@ function check_post_6_0() {
 function generate_post_6_0() {
 	mkdir -p "${output_root}"
 	echo "Linux >= 6.0"
+	echo "Generating ${output_root}/${check_api}.h"
 	cat <<- EOF > "${output_root}/${check_api}.h"
 		#ifndef LENS_DAX_CHECK_H
 		#define LENS_DAX_CHECK_H

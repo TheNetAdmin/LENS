@@ -19,7 +19,7 @@
  */
 #include "tasks.h"
 
-char *get_hostname(void)
+static char *get_hostname(void)
 {
 	return utsname()->nodename;
 }
@@ -99,10 +99,8 @@ void print_core_id(void)
 {
 	/* https://stackoverflow.com/questions/61349444/linux-kernel-development-how-to-get-physical-core-id */
 	unsigned cpu;
-	struct cpuinfo_x86 *info;
 
 	cpu  = get_cpu();
-	info = &cpu_data(cpu);
-	printk("CPU: %u, core: %d, smp_processor: %d\n", cpu, info->cpu_core_id, smp_processor_id());
+	printk("CPU: %u, core: %d, smp_processor: %d\n", cpu, topology_core_id(cpu), smp_processor_id());
 	put_cpu();
 }

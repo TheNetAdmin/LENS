@@ -83,11 +83,10 @@ static struct report_sbi *rep_sbi;
 #define X86_FEATURE_CLFLUSHOPT (9 * 32 + 23) /* CLFLUSHOPT instruction */
 #endif
 #ifndef X86_FEATURE_CLWB
-#define X86_FEATURE_CLWB       (9 * 32 + 24) /* CLWB instruction */
+#define X86_FEATURE_CLWB (9 * 32 + 24) /* CLWB instruction */
 #endif
 
-#define PAGENR_2_ADDR (ctx, pagenr, dimm)                                      \
-	ctx->addr + (dimm * pagenr << PAGE_SHIFT)
+#define PAGENR_2_ADDR (ctx, pagenr, dimm) ctx->addr + (dimm * pagenr << PAGE_SHIFT)
 
 static inline bool arch_has_clwb(void)
 {
@@ -101,6 +100,7 @@ int latencyfs_print_help(struct seq_file *seq, void *v)
 	int i;
 	int len_chasing_funcs;
 
+	/* clang-format off */
 	seq_printf(seq, "LENS task=<task> op=<op> [options]\n");
 #ifndef CLWB_SUPPORTED
 	seq_printf(seq, "!! Warning: clwb not supported on current platform.\n");
@@ -131,20 +131,19 @@ int latencyfs_print_help(struct seq_file *seq, void *v)
 
 	seq_printf(seq, "Available pointer chasing benchmarks:\n");
 	seq_printf(seq, "\tNo.\tName\t\t\tBlock Size (Byte)\n");
-	len_chasing_funcs =
-		sizeof(chasing_func_list) / sizeof(chasing_func_entry_t);
+	len_chasing_funcs = sizeof(chasing_func_list) / sizeof(chasing_func_entry_t);
 	for (i = 0; i < len_chasing_funcs; i++)
-		seq_printf(seq, "\t%d\t%s\t%llu\n", i, chasing_func_list[i].name,
-			   chasing_func_list[i].block_size);
+		seq_printf(seq, "\t%d\t%s\t%llu\n", i, chasing_func_list[i].name, chasing_func_list[i].block_size);
 
 	seq_printf(seq, "Available pointer chasing back and forth benchmarks:\n");
 	seq_printf(seq, "\tNo.\tName\t\t\tBlock Size (Byte)\n");
 	len_chasing_funcs =
 		sizeof(chasing_baf_func_list) / sizeof(chasing_func_entry_t);
 	for (i = 0; i < len_chasing_funcs; i++)
-		seq_printf(seq, "\t%d\t%s\t%llu\n", i, chasing_baf_func_list[i].name,
-			   chasing_baf_func_list[i].block_size);
+		seq_printf(
+		        seq, "\t%d\t%s\t%llu\n", i, chasing_baf_func_list[i].name, chasing_baf_func_list[i].block_size);
 
+	/* clang-format on */
 	return 0;
 }
 
@@ -172,12 +171,10 @@ inline void latencyfs_new_threads(struct latency_sbi *sbi, bench_func_t func)
 	}
 
 	sbi->workers = kmalloc(sizeof(struct task_struct *) * cnt, GFP_KERNEL);
-	sbi->ctx =
-		kmalloc(sizeof(struct latencyfs_worker_ctx) * cnt, GFP_KERNEL);
-	sbi->timing =
-		kmalloc(sizeof(struct latencyfs_timing) * cnt, GFP_KERNEL);
+	sbi->ctx     = kmalloc(sizeof(struct latencyfs_worker_ctx) * cnt, GFP_KERNEL);
+	sbi->timing  = kmalloc(sizeof(struct latencyfs_timing) * cnt, GFP_KERNEL);
 	for (i = 0; i < cnt; i++) {
-		ctx	     = &sbi->ctx[i];
+		ctx          = &sbi->ctx[i];
 		ctx->sbi     = sbi;
 		ctx->core_id = i;
 		ctx->job_id  = i;
@@ -188,14 +185,12 @@ inline void latencyfs_new_threads(struct latency_sbi *sbi, bench_func_t func)
 			ctx->addr = (u8 *)sbi->virt_addr;
 			break;
 		case ALIGN_PERTHREAD:
-			ctx->addr =
-				(u8 *)sbi->virt_addr + (i * PERTHREAD_WORKSET);
+			ctx->addr = (u8 *)sbi->virt_addr + (i * PERTHREAD_WORKSET);
 			break;
 		case ALIGN_PERDIMM:
 		case ALIGN_PERCHANNELGROUP:
 			dimmgroup = i / 6;
-			ctx->addr = (u8 *)sbi->virt_addr +
-				    (dimmgroup * PERDIMMGROUP_WORKSET);
+			ctx->addr = (u8 *)sbi->virt_addr + (dimmgroup * PERDIMMGROUP_WORKSET);
 			break;
 		case ALIGN_NI:
 			ctx->addr = (u8 *)sbi->virt_addr + ((i % 6) * 6 * 4096);
@@ -205,22 +200,19 @@ inline void latencyfs_new_threads(struct latency_sbi *sbi, bench_func_t func)
 			pr_err("Undefined align mode %d\n", sbi->align_mode);
 		}
 		sbi->timing[i].v = 0;
-		ctx->seed_addr =
-			(u8 *)sbi->rep->virt_addr + (i * PERTHREAD_WORKSET);
+		ctx->seed_addr   = (u8 *)sbi->rep->virt_addr + (i * PERTHREAD_WORKSET);
 		sprintf(kthread_name, "lens%d", ctx->core_id);
-		sbi->workers[i] =
-			kthread_create(func, (void *)ctx, kthread_name);
+		sbi->workers[i] = kthread_create(func, (void *)ctx, kthread_name);
 		kthread_bind(sbi->workers[i], ctx->core_id);
 	}
 }
 
-inline void latencyfs_new_pair_threads(struct latency_sbi *sbi,
-				       bench_func_t	   func)
+inline void latencyfs_new_pair_threads(struct latency_sbi *sbi, bench_func_t func)
 {
-	int			     i;
+	int i;
 	struct latencyfs_worker_ctx *ctx;
-	int			     cnt = sbi->worker_cnt;
-	char			     kthread_name[20];
+	int cnt = sbi->worker_cnt;
+	char kthread_name[20];
 
 	if (cnt != 2) {
 		pr_err("Number of threads must be 2, but got %d\n", cnt);
@@ -228,26 +220,23 @@ inline void latencyfs_new_pair_threads(struct latency_sbi *sbi,
 	}
 
 	sbi->workers = kmalloc(sizeof(struct task_struct *) * cnt, GFP_KERNEL);
-	sbi->ctx =
-		kmalloc(sizeof(struct latencyfs_worker_ctx) * cnt, GFP_KERNEL);
-	sbi->timing =
-		kmalloc(sizeof(struct latencyfs_timing) * cnt, GFP_KERNEL);
+	sbi->ctx     = kmalloc(sizeof(struct latencyfs_worker_ctx) * cnt, GFP_KERNEL);
+	sbi->timing  = kmalloc(sizeof(struct latencyfs_timing) * cnt, GFP_KERNEL);
 	for (i = 0; i < cnt; i++) {
-		ctx	     = &sbi->ctx[i];
+		ctx          = &sbi->ctx[i];
 		ctx->sbi     = sbi;
 		ctx->core_id = i + 1;
 		ctx->job_id  = i;
 		switch (sbi->align_mode) {
 		case ALIGN_BY_SIZE:
-			ctx->addr =
-				(u8 *)sbi->virt_addr + (i * sbi->align_size);
-			pr_info("ctx->addr=%px, align_size = 0x%016llx\n",
-				ctx->addr, sbi->align_size);
+			ctx->addr = (u8 *)sbi->virt_addr + (i * sbi->align_size);
+			pr_info("ctx->addr=%px, align_size = 0x%016llx\n", ctx->addr, sbi->align_size);
 			break;
 		default:
 			ctx->addr = (u8 *)sbi->virt_addr;
 			pr_info("Undefined align mode %d, default to sbi->virt_addr=%px\n",
-				sbi->align_mode, sbi->virt_addr);
+			        sbi->align_mode,
+			        sbi->virt_addr);
 			break;
 		}
 		init_completion(&ctx->complete);
@@ -255,22 +244,19 @@ inline void latencyfs_new_pair_threads(struct latency_sbi *sbi,
 		init_completion(&ctx->sub_op_complete);
 		sbi->timing[i].v = 0;
 		sprintf(kthread_name, "lens[%d]", ctx->job_id);
-		sbi->workers[i] =
-			kthread_create(func, (void *)ctx, kthread_name);
+		sbi->workers[i] = kthread_create(func, (void *)ctx, kthread_name);
 		kthread_bind(sbi->workers[i], ctx->core_id);
 	}
 }
 
-void latencyfs_timer_callback(unsigned long data)
+static void latencyfs_timer_callback(unsigned long data)
 {
 	//TODO
 }
 
 inline void latencyfs_create_seed(struct latency_sbi *sbi)
 {
-	latencyfs_prealloc_large(sbi->rep->virt_addr,
-				 sbi->worker_cnt * PERTHREAD_WORKSET,
-				 PERTHREAD_MASK);
+	latencyfs_prealloc_large(sbi->rep->virt_addr, sbi->worker_cnt * PERTHREAD_WORKSET, PERTHREAD_MASK);
 	pr_info("Random buffer created.");
 	drop_cache();
 }
@@ -290,7 +276,7 @@ inline void latencyfs_monitor_threads(struct latency_sbi *sbi)
 	int i;
 	int elapsed = 0;
 	int runtime = sbi->runtime;
-	u64 last = 0, total;
+	u64 last    = 0, total;
 
 	latencyfs_create_seed(sbi);
 
@@ -308,8 +294,7 @@ inline void latencyfs_monitor_threads(struct latency_sbi *sbi)
 		for (i = 0; i < sbi->worker_cnt; i++) {
 			total += sbi->timing[i].v;
 		}
-		printk(KERN_ALERT "%d\t%lld (%d)\n", elapsed + 1,
-		       (total - last) / MB, smp_processor_id());
+		printk(KERN_ALERT "%d\t%lld (%d)\n", elapsed + 1, (total - last) / MB, smp_processor_id());
 
 		last = total;
 		elapsed++;
@@ -363,7 +348,7 @@ inline void latencyfs_monitor_pair_threads(struct latency_sbi *sbi)
 	pr_info("LENS_THREADS_ALL_FINSIHED");
 }
 
-int setup_singlethread_op(struct latency_sbi *sbi, int op)
+static int setup_singlethread_op(struct latency_sbi *sbi, int op)
 {
 	switch (op) {
 	case TASK_BASIC_OP:
@@ -404,7 +389,7 @@ int setup_singlethread_op(struct latency_sbi *sbi, int op)
 	return 0;
 }
 
-int setup_multithread_op(struct latency_sbi *sbi, int op)
+static int setup_multithread_op(struct latency_sbi *sbi, int op)
 {
 	unsigned long delta = 0;
 	switch (op) {
@@ -424,7 +409,7 @@ int setup_multithread_op(struct latency_sbi *sbi, int op)
 	return 0;
 }
 
-int setup_multi_pair_thread_op(struct latency_sbi *sbi, int op)
+static int setup_multi_pair_thread_op(struct latency_sbi *sbi, int op)
 {
 	switch (op) {
 	case TASK_BUFFER_COVERT_CHANNEL: // 13
@@ -462,16 +447,16 @@ void latencyfs_start_task(struct latency_sbi *sbi, int task, int threads)
 	case TASK_PC_STRIDED:
 	case TASK_DEBUGGING:
 		sbi->worker_cnt = 1;
-		ret = setup_singlethread_op(sbi, task);
+		ret             = setup_singlethread_op(sbi, task);
 		break;
 
 	case TASK_STRIDED_BW:
 	case TASK_SIZE_BW:
 	case TASK_SEQ:
 		sbi->worker_cnt = threads;
-		ret = setup_multithread_op(sbi, task);
+		ret             = setup_multithread_op(sbi, task);
 		break;
-	
+
 	case TASK_BUFFER_COVERT_CHANNEL:
 	case TASK_WEAR_LEVELING_COVERT_CHANNEL:
 	case TASK_WEAR_LEVELING_SIDE_CHANNEL:
@@ -480,7 +465,7 @@ void latencyfs_start_task(struct latency_sbi *sbi, int task, int threads)
 			return;
 		}
 		sbi->worker_cnt = threads;
-		ret = setup_multi_pair_thread_op(sbi, task);
+		ret             = setup_multi_pair_thread_op(sbi, task);
 		break;
 
 	case TASK_INVALID:
@@ -507,6 +492,7 @@ static int latencyfs_fill_super(struct super_block *sb, void *data, int silent)
 	struct inode *root;
 	struct dax_device *dax_dev;
 	pfn_t __pfn_t;
+	u64 offset;
 	long size;
 	int ret;
 
@@ -526,12 +512,11 @@ static int latencyfs_fill_super(struct super_block *sb, void *data, int silent)
 	if (!sbi)
 		return -ENOMEM;
 	sb->s_fs_info = sbi;
-	sbi->sb	      = sb;
+	sbi->sb       = sb;
 	sbi->rep      = rep_sbi;
 
 	ret = check_dax(sb, PAGE_SIZE);
-	pr_info("%s: dax_supported = %d; bdev->super=0x%px", __func__, ret,
-		sb->s_bdev->bd_super);
+	pr_info("%s: dax_supported = %d", __func__, ret);
 	if (ret) {
 		pr_err("device does not support DAX\n");
 		return -EINVAL;
@@ -539,14 +524,13 @@ static int latencyfs_fill_super(struct super_block *sb, void *data, int silent)
 
 	sbi->s_bdev = sb->s_bdev;
 
-	dax_dev = dax_get_by_host(sb->s_bdev->bd_disk->disk_name);
+	dax_dev = fs_dax_get_by_bdev(sb->s_bdev, &offset, NULL, NULL);
 	if (!dax_dev) {
 		pr_err("Couldn't retrieve DAX device.\n");
 		return -EINVAL;
 	}
 
-	size = dax_direct_access(dax_dev, 0, LONG_MAX / PAGE_SIZE, &virt_addr,
-				 &__pfn_t) * PAGE_SIZE;
+	size = dax_direct_access(dax_dev, 0, LONG_MAX / PAGE_SIZE, DAX_ACCESS, &virt_addr, &__pfn_t) * PAGE_SIZE;
 	if (size <= 0) {
 		pr_err("direct_access failed\n");
 		return -EINVAL;
@@ -556,9 +540,13 @@ static int latencyfs_fill_super(struct super_block *sb, void *data, int silent)
 	sbi->phys_addr = pfn_t_to_pfn(__pfn_t) << PAGE_SHIFT;
 	sbi->initsize  = size;
 
-	pr_info("%s: dev %s, phys_addr 0x%llx, virt_addr 0x%016llx, size %ld\n",
-		__func__, sbi->s_bdev->bd_disk->disk_name, (uint64_t)sbi->phys_addr,
-		(uint64_t)sbi->virt_addr, sbi->initsize);
+	pr_info("%s: dev %s, dax_offset 0x%llx, phys_addr 0x%llx, virt_addr 0x%016llx, size %ld\n",
+	        __func__,
+	        sbi->s_bdev->bd_disk->disk_name,
+	        offset,
+	        (uint64_t)sbi->phys_addr,
+	        (uint64_t)sbi->virt_addr,
+	        sbi->initsize);
 
 	root = new_inode(sb);
 	if (!root) {
@@ -568,20 +556,10 @@ static int latencyfs_fill_super(struct super_block *sb, void *data, int silent)
 
 	root->i_ino = 0;
 	root->i_sb  = sb;
-	pr_info("DEBUG: lat: root->i_ctime[%px]=%llu\n", &root->i_ctime, root->i_ctime.tv_sec);
-// #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 20, 0)
-// 	// ktime_get_ts64(&root->i_ctime);
-// 	root->i_ctime = ktime_to_timespec64(ktime_get_real());
-// #else
-// 	ktime_get_coarse_real_ts64(&root->i_ctime);
-// #endif
-	pr_info("DEBUG: lat: root->i_ctime[%px]=%llu\n", &root->i_ctime, root->i_ctime.tv_sec);
-	// root->i_atime = root->i_mtime = root->i_ctime;
-	root->i_atime.tv_sec = root->i_ctime.tv_sec;
-	root->i_atime.tv_nsec = root->i_ctime.tv_nsec;
-	root->i_mtime.tv_sec = root->i_ctime.tv_sec;
-	root->i_mtime.tv_nsec = root->i_ctime.tv_nsec;
-	inode_init_owner(root, NULL, S_IFDIR);
+	inode_set_ctime_current(root);
+	inode_set_atime_to_ts(root, root->__i_ctime);
+	inode_set_mtime_to_ts(root, root->__i_ctime);
+	inode_init_owner(&nop_mnt_idmap, root, NULL, S_IFDIR);
 
 	sb->s_root = d_make_root(root);
 	if (!sb->s_root) {
@@ -598,9 +576,7 @@ static int latencyfs_fill_super(struct super_block *sb, void *data, int silent)
 	return 0;
 }
 
-static struct dentry *latencyfs_mount(struct file_system_type *fs_type,
-				      int flags, const char *dev_name,
-				      void *data)
+static struct dentry *latencyfs_mount(struct file_system_type *fs_type, int flags, const char *dev_name, void *data)
 {
 	struct dentry *ret;
 	if (!dev_name || !*dev_name) {
@@ -611,9 +587,9 @@ static struct dentry *latencyfs_mount(struct file_system_type *fs_type,
 }
 
 static struct file_system_type latencyfs_fs_type = {
-	.owner = THIS_MODULE,
-	.name = "LatencyFS",
-	.mount = latencyfs_mount,
+	.owner   = THIS_MODULE,
+	.name    = "LatencyFS",
+	.mount   = latencyfs_mount,
 	.kill_sb = kill_block_super,
 };
 
@@ -628,8 +604,7 @@ static int __init init_latencyfs(void)
 	if (arch_has_clwb())
 		support_clwb = 1;
 
-	pr_info("Arch new instructions support: CLWB %s\n",
-		support_clwb ? "YES" : "NO");
+	pr_info("Arch new instructions support: CLWB %s\n", support_clwb ? "YES" : "NO");
 
 	fp = filp_open("/proc/lens", O_RDONLY, 0);
 	if (!PTR_ERR(fp)) {
