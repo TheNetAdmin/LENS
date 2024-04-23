@@ -27,6 +27,8 @@
 #include <linux/mount.h>
 #include <linux/mm.h>
 #include <linux/mmzone.h>
+
+#include <linux/nodemask.h>
 #include <linux/bitops.h>
 #include <linux/exportfs.h>
 #include <linux/list.h>
@@ -42,7 +44,8 @@
 #include "microbench/chasing_baf.h"
 #include "microbench/overwrite.h"
 
-struct latency_sbi *global_sbi = NULL;
+struct latency_sbi *global_sbi  = NULL;
+static struct report_sbi *g_report_sbi = NULL;
 
 uint32_t *lfs_random_array = NULL;
 
@@ -77,8 +80,6 @@ MODULE_PARM_DESC(threads, "#threads");
 module_param(runtime, int, 0444);
 MODULE_PARM_DESC(runtime, "runtime");
 */
-
-static struct report_sbi *rep_sbi = NULL;
 
 #ifndef X86_FEATURE_CLFLUSHOPT
 #define X86_FEATURE_CLFLUSHOPT (9 * 32 + 23) /* CLFLUSHOPT instruction */
@@ -486,42 +487,32 @@ void latencyfs_start_task(struct latency_sbi *sbi, int task, int threads)
 	}
 }
 
-static int lens_cxl_fs_fill_super(struct super_block *sb, void *data, int silent)
+static int report_fill_super(struct super_block *sb, void *data, int silent)
 {
-	struct latency_sbi *sbi;
+	struct report_sbi *sbi;
 	void *virt_addr = NULL;
 	struct inode *root;
 	struct dax_device *dax_dev;
 	pfn_t __pfn_t;
-	u64 offset;
 	long size;
 	int ret;
-	int node_id = 2;
-	u64 node_start, node_end;
+	u64 offset;
 
-	node_start = node_start_pfn(node_id);
-	node_end = node_end_pfn(node_id);
-
-	pr_info("NUMA node [%d] start [0x%llx] end [0x%llx]\n", node_id, node_start, node_end);
-
-	if (rep_sbi) {
-		pr_err("Already mounted\n");
-		return -EEXIST;
-	}
-
-	rep_sbi = reportfs_get_sbi();
-
-	if (!rep_sbi) {
-		pr_err("Mount ReportFS first\n");
-		return -EINVAL;
-	}
-
-	sbi = kzalloc(sizeof(struct latency_sbi), GFP_KERNEL);
+	sbi = kzalloc(sizeof(struct report_sbi), GFP_KERNEL);
 	if (!sbi)
 		return -ENOMEM;
+
+	if (g_report_sbi) {
+		pr_err("Another ReportFS already at VA %px PA %llx\n",
+		       g_report_sbi->virt_addr,
+		       g_report_sbi->phys_addr);
+		return -EEXIST;
+	} else {
+		g_report_sbi = sbi;
+	}
+
 	sb->s_fs_info = sbi;
 	sbi->sb       = sb;
-	sbi->rep      = rep_sbi;
 
 	ret = check_dax(sb, PAGE_SIZE);
 	pr_info("%s: dax_supported = %d", __func__, ret);
@@ -567,6 +558,10 @@ static int lens_cxl_fs_fill_super(struct super_block *sb, void *data, int silent
 	inode_set_ctime_current(root);
 	inode_set_atime_to_ts(root, root->__i_ctime);
 	inode_set_mtime_to_ts(root, root->__i_ctime);
+	/* 
+	 * Linux 5.12 introduced `struct user_namespace *mnt_userns` as the 1st
+	 * arg of inode_init_owner.
+	 */
 	inode_init_owner(&nop_mnt_idmap, root, NULL, S_IFDIR);
 
 	sb->s_root = d_make_root(root);
@@ -575,11 +570,61 @@ static int lens_cxl_fs_fill_super(struct super_block *sb, void *data, int silent
 		return -ENOMEM;
 	}
 
+	pr_info("[%s] sb->s_root=0x%px", __func__, sb->s_root);
+
+	return 0;
+}
+
+static int lens_cxl_fs_fill_super(struct super_block *sb, void *data, int silent)
+{
+	struct latency_sbi *sbi;
+	void *virt_addr = NULL;
+	struct inode *root;
+	struct dax_device *dax_dev;
+	pfn_t __pfn_t;
+	u64 offset;
+	long size;
+	int ret;
+	int node_id = 2;
+	u64 node_start, node_end;
+
+	/* Prepare report fs area */
+	ret = report_fill_super(sb, data, silent);
+	if (ret) {
+		pr_err("Fail to mount report fs region\n");
+		return -EINVAL;
+	}
+
+	/* Prepare latency job struct */
+	sbi = kzalloc(sizeof(struct latency_sbi), GFP_KERNEL);
+	if (!sbi)
+		return -ENOMEM;
+	sbi->rep = g_report_sbi;
+	sbi->sb  = g_report_sbi->sb;
+
+	/* Get NUMA node range */
+	if (!node_online(node_id)) {
+		pr_err("Node %d is not online or does not exist.\n", node_id);
+		return -ENODEV; // No such device
+	}
+
+	node_start = node_start_pfn(node_id);
+	node_end   = node_end_pfn(node_id);
+
+	if (node_start == ULONG_MAX) {
+		pr_err("Node %d does not have any physical memory.\n", node_id);
+		return -ENODEV;
+	}
+
+	pr_info("NUMA node [%d] start [0x%llx] end [0x%llx]\n", node_id, node_start, node_end);
+
+	sbi->phys_addr = node_start << PAGE_SHIFT;
+	sbi->initsize  = (node_end - node_start) << PAGE_SHIFT;
+	sbi->virt_addr = phys_to_virt(sbi->phys_addr);
+
 	global_sbi = sbi;
 
-	pr_info("[%s] sb->s_root=0x%px", __func__, sb->s_root);
 	pr_info("done");
-	// pr_info("DEBUG: dget=%px\n", dget(sb->s_root));
 
 	return 0;
 }
