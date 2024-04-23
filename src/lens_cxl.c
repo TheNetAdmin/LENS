@@ -608,6 +608,7 @@ static int lens_cxl_fs_fill_super(struct super_block *sb, void *data, int silent
 		return -ENODEV; // No such device
 	}
 
+	pr_info("%s: TODO: hard coding numa node 2, should implement argument to choose one\n", __func__);
 	node_start = node_start_pfn(node_id);
 	node_end   = node_end_pfn(node_id);
 

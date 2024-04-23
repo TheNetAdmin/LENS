@@ -41,10 +41,10 @@ LATFS=$(sudo lsmod | grep latfs) || true
 echo "Check and unmount previous modules"
 if [ ! -z "$REPFS" ]; then
 	echo Unmounting existing partitions
-	$this_script_path/umount.sh
+	$this_script_path/umount_separate.sh
 elif [ ! -z "$LATFS" ]; then
 	echo Unmounting existing partitions
-	$this_script_path/umount.sh
+	$this_script_path/umount_separate.sh
 fi
 
 echo "Insert new modules"

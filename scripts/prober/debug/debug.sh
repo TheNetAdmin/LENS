@@ -13,7 +13,7 @@ task_name=TASK_DEBUGGING
 
 
 msg="$(hostname)-debugging"
-lens_arg="task=$op,op=1,pc_region_size=$((16*1024*1024)),message=$msg"
+lens_arg="task=$op,op=0,pc_region_size=$((16*1024*1024)),message=$msg"
 
 if [ $Slack -ne 0 ]; then
 	source $(realpath $(dirname $0))/../../utils/slack.sh

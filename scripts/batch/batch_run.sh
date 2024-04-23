@@ -46,6 +46,8 @@ for sid in "${all_script_id[@]}"; do
     
 	mkdir -p "$result_path/tasks"
 
+	modprobe msr
+
 	echo "Dump kernel dmesg"
 	(dmesg -w > "$result_path/tasks/dmesg.log") &
 	dmesg_pid=$!

@@ -163,13 +163,13 @@ case "${host_name}" in
 		# example: From the above `dmesg` output, `pmem2` phys_addr is
 		#          0x18be200000, thus us_base should be 0x2000000000, the first
 		#          power of 2 number after pmem2 phys_addr
-		export uc_base=0xc00000000
+		export uc_base=0x3000000000
 		# uc_size: Uncacheable region size, set it to covert the entire first
 		#          NVRAM region, must be a power of 2 and it's ok to go over
 		#          the NVRAM region
 		# example: A single NVRAM DIMM on this machine is 128 GiB, then set
 		#          uc_size to 128 GiB, i.e., 0x2000000000
-		export uc_size=0x100000000
+		export uc_size=0x2000000000
 		# uc_size_mb: The output from `cat /proc/mtrr` size field, for the
 		#             uncacheable region set above. You can get this number
 		#             after you set up the above numbers, run `batch_run.sh 001`
@@ -177,7 +177,7 @@ case "${host_name}" in
 		# usage:      This value is used by 001_setup_mtrr.sh to detect if the
 		#             NVRAM uncacheable region is already set up, so it can skip
 		#             and not to re-set it up.
-		export uc_size_mb=65536MB
+		export uc_size_mb=131072MB
 		# uc_type: MTRR region type, set it to uncacheable or other valid
 		#          options, check MTRR-related kernel doc for more details
 		export uc_type=uncachable
