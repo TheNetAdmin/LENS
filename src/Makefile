@@ -1,4 +1,4 @@
-obj-m += repfs.o latfs.o
+obj-m += repfs.o latfs.o lens-cxl-fs.o
 
 ccflags-y+=-mmmx -msse2 -mavx -mavx2 -mpreferred-stack-boundary=4
 ccflags-y+=-I ${PWD}
@@ -25,6 +25,30 @@ latfs-y += tasks/01_basic_op.o                     \
            tasks/14_debugging.o                    \
            tasks/15_wear_leveling_covert_channel.o \
            tasks/16_wear_leveling_side_channel.o
+
+lens-cxl-fs-y := lens_cxl.o 
+lens-cxl-fs-y += proc.o misc.o memaccess.o tasks.o
+lens-cxl-fs-y += microbench/chasing.o           \
+                 microbench/overwrite.o         \
+                 microbench/channel_covert.o    \
+                 microbench/channel_side.o      \
+                 microbench/misc.o
+lens-cxl-fs-y += tasks/01_basic_op.o                     \
+                 tasks/02_strided_lat.o                  \
+                 tasks/03_strided_bw.o                   \
+                 tasks/04_size_bw.o                      \
+                 tasks/05_overwrite.o                    \
+                 tasks/06_pc_write.o                     \
+                 tasks/07_pc_read_and_write.o            \
+                 tasks/08_pc_read_after_write.o          \
+                 tasks/09_seq.o                          \
+                 tasks/10_flush_first.o                  \
+                 tasks/11_wear_leveling.o                \
+                 tasks/12_pc_strided.o                   \
+                 tasks/13_buffer_covert_channel.o        \
+                 tasks/14_debugging.o                    \
+                 tasks/15_wear_leveling_covert_channel.o \
+                 tasks/16_wear_leveling_side_channel.o
 
 comp-h := comp_utils/dax_check.h \
           comp_utils/proc_ops.h  \

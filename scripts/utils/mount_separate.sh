@@ -4,8 +4,8 @@
 set -e
 
 if [ $# -ne 2 ] && [ $# -ne 3 ]; then
-    echo './mount.sh [DRAM_DEV] [NUMA_NODE] [no_remake]'
-    echo 'e.g., ./mount.sh /dev/pmem0 2'
+    echo './mount.sh [DRAM_DEV] [PMEM_DEV] [no_remake]'
+    echo 'e.g., ./mount.sh /dev/pmem0 /dev/pmem14'
     exit 1
 fi
 
@@ -16,9 +16,11 @@ echo "Src path: ${src_path}"
 pushd "${src_path}"
 
 DRAM_DEV=$1
-NUMA_NODE=$2
+PMEM_DEV=$2
 NO_REMAKE=$3
 
+# Hard lock watchdog at nmi_watchdog
+sudo bash -c "echo 0 > /proc/sys/kernel/soft_watchdog"
 
 if test "${NO_REMAKE}" == ""; then
 	echo "Compiling"
@@ -30,26 +32,28 @@ else
 fi
 
 echo "Make mount points"
+sudo mkdir -p /mnt/latency
 sudo mkdir -p /mnt/report
 
-LENS_CXL_FS=$(sudo lsmod | grep lens_cxl_fs) || true
+REPFS=$(sudo lsmod | grep repfs) || true
+LATFS=$(sudo lsmod | grep latfs) || true
 
 echo "Check and unmount previous modules"
-if [ ! -z "$LENS_CXL_FS" ]; then
+if [ ! -z "$REPFS" ]; then
 	echo Unmounting existing partitions
-	sudo umount /mnt/report
-	sudo rmmod lens_cxl_fs
-	sudo bash -c "echo 1 > /proc/sys/kernel/soft_watchdog"
+	$this_script_path/umount.sh
+elif [ ! -z "$LATFS" ]; then
+	echo Unmounting existing partitions
+	$this_script_path/umount.sh
 fi
 
-# Hard lock watchdog at nmi_watchdog
-sudo bash -c "echo 0 > /proc/sys/kernel/soft_watchdog"
-
 echo "Insert new modules"
-sudo insmod lens_cxl_fs.ko
+sudo insmod repfs.ko
+sudo insmod latfs.ko
 
-echo "Mount LensCxlFS"
-sudo mount -t LensCxlFS $DRAM_DEV /mnt/report
+echo "Mount ReportFS and LatencyFS"
+sudo mount -t ReportFS $DRAM_DEV /mnt/report
+sudo mount -t LatencyFS $PMEM_DEV /mnt/latency
 
 echo "$0 Finished"
 

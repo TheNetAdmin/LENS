@@ -40,6 +40,8 @@ uint8_t *get_uc_addr(struct latencyfs_worker_ctx *ctx, uc_addr_align_mode_t alig
 		addr = (uint8_t *)(ctx->addr);
 	} else if (0 == strcmp(hostname, "netserver-ubuntu")) {
 		addr = (uint8_t *)(ctx->addr);
+	} else if (0 == strcmp(hostname, "stormbreaker")) {
+		addr = (uint8_t *)(ctx->addr);
 	} else {
 		BUG_ON("Unrecognized hostname");
 	}
@@ -90,6 +92,11 @@ uint64_t get_dimm_size(void)
 		return (8UL * GB);
 	} else if (0 == strcmp(hostname, "netserver-ubuntu")) {
 		return (8UL * GB);
+	} else if (0 == strcmp(hostname, "stormbreaker")) {
+		/* Although there is 64GiB CXL Type 3 memory, try not to use all
+		 * of them to avoid potential out-of-bound access.
+		 */
+		return (32UL * GB);
 	} else {
 		BUG_ON("Unrecognized hostname");
 	}

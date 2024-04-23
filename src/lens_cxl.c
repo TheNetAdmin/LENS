@@ -46,7 +46,7 @@ struct latency_sbi *global_sbi = NULL;
 
 uint32_t *lfs_random_array = NULL;
 
-struct mutex latencyfs_lock;
+struct mutex lens_cxl_fs_lock;
 
 int support_clwb = 0;
 
@@ -148,14 +148,14 @@ int latencyfs_print_help(struct seq_file *seq, void *v)
 	return 0;
 }
 
-inline void latencyfs_cleanup(struct latency_sbi *sbi)
+inline void lens_cxl_fs_cleanup(struct latency_sbi *sbi)
 {
 	kfree(sbi->workers);
 	kfree(sbi->timing);
 	kfree(sbi->ctx);
 }
 
-inline void latencyfs_new_threads(struct latency_sbi *sbi, bench_func_t func)
+inline void lens_cxl_fs_new_threads(struct latency_sbi *sbi, bench_func_t func)
 {
 	int i;
 	struct latencyfs_worker_ctx *ctx;
@@ -208,7 +208,7 @@ inline void latencyfs_new_threads(struct latency_sbi *sbi, bench_func_t func)
 	}
 }
 
-inline void latencyfs_new_pair_threads(struct latency_sbi *sbi, bench_func_t func)
+inline void lens_cxl_fs_new_pair_threads(struct latency_sbi *sbi, bench_func_t func)
 {
 	int i;
 	struct latencyfs_worker_ctx *ctx;
@@ -250,19 +250,19 @@ inline void latencyfs_new_pair_threads(struct latency_sbi *sbi, bench_func_t fun
 	}
 }
 
-static void latencyfs_timer_callback(unsigned long data)
+static void lens_cxl_fs_timer_callback(unsigned long data)
 {
 	//TODO
 }
 
-inline void latencyfs_create_seed(struct latency_sbi *sbi)
+inline void lens_cxl_fs_create_seed(struct latency_sbi *sbi)
 {
 	latencyfs_prealloc_large(sbi->rep->virt_addr, sbi->worker_cnt * PERTHREAD_WORKSET, PERTHREAD_MASK);
 	pr_info("Random buffer created.");
 	drop_cache();
 }
 
-inline void latencyfs_stop_threads(struct latency_sbi *sbi)
+inline void lens_cxl_fs_stop_threads(struct latency_sbi *sbi)
 {
 	int i;
 	int cnt = sbi->worker_cnt;
@@ -272,14 +272,14 @@ inline void latencyfs_stop_threads(struct latency_sbi *sbi)
 	}
 }
 
-inline void latencyfs_monitor_threads(struct latency_sbi *sbi)
+inline void lens_cxl_fs_monitor_threads(struct latency_sbi *sbi)
 {
 	int i;
 	int elapsed = 0;
 	int runtime = sbi->runtime;
 	u64 last    = 0, total;
 
-	latencyfs_create_seed(sbi);
+	lens_cxl_fs_create_seed(sbi);
 
 	/* Wake up workers */
 	for (i = 0; i < sbi->worker_cnt; i++) {
@@ -300,15 +300,15 @@ inline void latencyfs_monitor_threads(struct latency_sbi *sbi)
 		last = total;
 		elapsed++;
 	}
-	latencyfs_stop_threads(sbi);
+	lens_cxl_fs_stop_threads(sbi);
 }
 
-inline void latencyfs_monitor_pair_threads(struct latency_sbi *sbi)
+inline void lens_cxl_fs_monitor_pair_threads(struct latency_sbi *sbi)
 {
 	int i, j;
 
 	drop_cache();
-	// latencyfs_create_seed(sbi);
+	// lens_cxl_fs_create_seed(sbi);
 
 	/* Wake up workers */
 	for (i = 0; i < sbi->worker_cnt; i++) {
@@ -343,7 +343,7 @@ inline void latencyfs_monitor_pair_threads(struct latency_sbi *sbi)
 	for (i = 0; i < sbi->worker_cnt; i++) {
 		wait_for_completion(&sbi->ctx[i].complete);
 	}
-	latencyfs_stop_threads(sbi);
+	lens_cxl_fs_stop_threads(sbi);
 
 	/* Print final message */
 	pr_info("LENS_THREADS_ALL_FINSIHED");
@@ -353,34 +353,34 @@ static int setup_singlethread_op(struct latency_sbi *sbi, int op)
 {
 	switch (op) {
 	case TASK_BASIC_OP:
-		latencyfs_new_threads(sbi, &latency_job);
+		lens_cxl_fs_new_threads(sbi, &latency_job);
 		break;
 	case TASK_OVERWRITE:
-		latencyfs_new_threads(sbi, &overwrite_job);
+		lens_cxl_fs_new_threads(sbi, &overwrite_job);
 		break;
 	case TASK_PC_WRITE:
-		latencyfs_new_threads(sbi, &pointer_chasing_write_job);
+		lens_cxl_fs_new_threads(sbi, &pointer_chasing_write_job);
 		break;
 	case TASK_PC_READ_AND_WRITE:
-		latencyfs_new_threads(sbi, &pointer_chasing_read_and_write_job);
+		lens_cxl_fs_new_threads(sbi, &pointer_chasing_read_and_write_job);
 		break;
 	case TASK_PC_READ_AFTER_WRITE:
-		latencyfs_new_threads(sbi, &pointer_chasing_read_after_write_job);
+		lens_cxl_fs_new_threads(sbi, &pointer_chasing_read_after_write_job);
 		break;
 	case TASK_FLUSH_FIRST:
-		latencyfs_new_threads(sbi, &flush_first_job);
+		lens_cxl_fs_new_threads(sbi, &flush_first_job);
 		break;
 	case TASK_STRIDED_LAT:
-		latencyfs_new_threads(sbi, &strided_latjob);
+		lens_cxl_fs_new_threads(sbi, &strided_latjob);
 		break;
 	case TASK_WEAR_LEVELING:
-		latencyfs_new_threads(sbi, &wear_leveling_job);
+		lens_cxl_fs_new_threads(sbi, &wear_leveling_job);
 		break;
 	case TASK_PC_STRIDED:
-		latencyfs_new_threads(sbi, &pointer_chasing_strided_job);
+		lens_cxl_fs_new_threads(sbi, &pointer_chasing_strided_job);
 		break;
 	case TASK_DEBUGGING:
-		latencyfs_new_threads(sbi, &debugging_job);
+		lens_cxl_fs_new_threads(sbi, &debugging_job);
 		break;
 	default:
 		pr_err("Single thread op %d not expected\n", op);
@@ -395,18 +395,18 @@ static int setup_multithread_op(struct latency_sbi *sbi, int op)
 	unsigned long delta = 0;
 	switch (op) {
 	case TASK_STRIDED_BW: // 3
-		latencyfs_new_threads(sbi, &strided_bwjob);
+		lens_cxl_fs_new_threads(sbi, &strided_bwjob);
 		break;
 	case TASK_SIZE_BW: // 4
-		//latencyfs_prealloc_global_permutation_array(sbi->access_size);
+		//lens_cxl_fs_prealloc_global_permutation_array(sbi->access_size);
 		delta = PERTHREAD_CHECKSTOP % sbi->access_size;
-		latencyfs_new_threads(sbi, &sizebw_job);
+		lens_cxl_fs_new_threads(sbi, &sizebw_job);
 		break;
 	default:
 		pr_err("Multi thread op %d not expected\n", op);
 		return -EINVAL;
 	}
-	latencyfs_monitor_threads(sbi);
+	lens_cxl_fs_monitor_threads(sbi);
 	return 0;
 }
 
@@ -414,19 +414,19 @@ static int setup_multi_pair_thread_op(struct latency_sbi *sbi, int op)
 {
 	switch (op) {
 	case TASK_BUFFER_COVERT_CHANNEL: // 13
-		latencyfs_new_pair_threads(sbi, &buffer_covert_channel_job);
+		lens_cxl_fs_new_pair_threads(sbi, &buffer_covert_channel_job);
 		break;
 	case TASK_WEAR_LEVELING_COVERT_CHANNEL: // 15
-		latencyfs_new_pair_threads(sbi, &wear_leveling_covert_channel_job);
+		lens_cxl_fs_new_pair_threads(sbi, &wear_leveling_covert_channel_job);
 		break;
 	case TASK_WEAR_LEVELING_SIDE_CHANNEL: // 16
-		latencyfs_new_pair_threads(sbi, &wear_leveling_side_channel_job);
+		lens_cxl_fs_new_pair_threads(sbi, &wear_leveling_side_channel_job);
 		break;
 	default:
 		pr_err("Multi pair thread op %d not expected\n", op);
 		return -EINVAL;
 	}
-	latencyfs_monitor_pair_threads(sbi);
+	lens_cxl_fs_monitor_pair_threads(sbi);
 	return 0;
 }
 
@@ -486,7 +486,7 @@ void latencyfs_start_task(struct latency_sbi *sbi, int task, int threads)
 	}
 }
 
-static int latencyfs_fill_super(struct super_block *sb, void *data, int silent)
+static int lens_cxl_fs_fill_super(struct super_block *sb, void *data, int silent)
 {
 	struct latency_sbi *sbi;
 	void *virt_addr = NULL;
@@ -584,29 +584,29 @@ static int latencyfs_fill_super(struct super_block *sb, void *data, int silent)
 	return 0;
 }
 
-static struct dentry *latencyfs_mount(struct file_system_type *fs_type, int flags, const char *dev_name, void *data)
+static struct dentry *lens_cxl_fs_mount(struct file_system_type *fs_type, int flags, const char *dev_name, void *data)
 {
 	struct dentry *ret;
 	if (!dev_name || !*dev_name) {
 		BUG_ON("dev_name is NULL\n");
 	}
-	ret = mount_bdev(fs_type, flags, dev_name, data, latencyfs_fill_super);
+	ret = mount_bdev(fs_type, flags, dev_name, data, lens_cxl_fs_fill_super);
 	return ret;
 }
 
-static struct file_system_type latencyfs_fs_type = {
+static struct file_system_type lens_cxl_fs_fs_type = {
 	.owner   = THIS_MODULE,
-	.name    = "LatencyFS",
-	.mount   = latencyfs_mount,
+	.name    = "lens_cxl_fs",
+	.mount   = lens_cxl_fs_mount,
 	.kill_sb = kill_block_super,
 };
 
-static int __init init_latencyfs(void)
+static int __init init_lens_cxl_fs(void)
 {
 	int rc = 0;
 	struct file *fp;
 
-	mutex_init(&latencyfs_lock);
+	mutex_init(&lens_cxl_fs_lock);
 
 	pr_info("%s: %d cpus online\n", __func__, num_online_cpus());
 	if (arch_has_clwb())
@@ -624,22 +624,22 @@ static int __init init_latencyfs(void)
 	if (rc)
 		return rc;
 
-	rc = register_filesystem(&latencyfs_fs_type);
+	rc = register_filesystem(&lens_cxl_fs_fs_type);
 	if (rc)
 		return rc;
 
 	return 0;
 }
 
-static void __exit exit_latencyfs(void)
+static void __exit exit_lens_cxl_fs(void)
 {
 	if (lfs_random_array)
 		kfree(lfs_random_array);
 	remove_proc_entry("lens", NULL);
-	unregister_filesystem(&latencyfs_fs_type);
+	unregister_filesystem(&lens_cxl_fs_fs_type);
 }
 
 MODULE_LICENSE("GPL");
 
-module_init(init_latencyfs);
-module_exit(exit_latencyfs);
+module_init(init_lens_cxl_fs);
+module_exit(exit_lens_cxl_fs);
