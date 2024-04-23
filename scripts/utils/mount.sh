@@ -48,8 +48,8 @@ sudo bash -c "echo 0 > /proc/sys/kernel/soft_watchdog"
 echo "Insert new modules"
 sudo insmod lens_cxl_fs.ko
 
-echo "Mount LensCxlFS"
-sudo mount -t LensCxlFS $DRAM_DEV /mnt/report
+echo "Mount lens_cxl_fs"
+sudo mount -t lens_cxl_fs $DRAM_DEV /mnt/report
 
 echo "$0 Finished"
 

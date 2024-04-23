@@ -1,4 +1,4 @@
-obj-m += repfs.o latfs.o lens-cxl-fs.o
+obj-m += repfs.o latfs.o lens_cxl_fs.o
 
 ccflags-y+=-mmmx -msse2 -mavx -mavx2 -mpreferred-stack-boundary=4
 ccflags-y+=-I ${PWD}
@@ -26,14 +26,14 @@ latfs-y += tasks/01_basic_op.o                     \
            tasks/15_wear_leveling_covert_channel.o \
            tasks/16_wear_leveling_side_channel.o
 
-lens-cxl-fs-y := lens_cxl.o 
-lens-cxl-fs-y += proc.o misc.o memaccess.o tasks.o
-lens-cxl-fs-y += microbench/chasing.o           \
+lens_cxl_fs-y := lens_cxl.o 
+lens_cxl_fs-y += proc.o misc.o memaccess.o tasks.o
+lens_cxl_fs-y += microbench/chasing.o           \
                  microbench/overwrite.o         \
                  microbench/channel_covert.o    \
                  microbench/channel_side.o      \
                  microbench/misc.o
-lens-cxl-fs-y += tasks/01_basic_op.o                     \
+lens_cxl_fs-y += tasks/01_basic_op.o                     \
                  tasks/02_strided_lat.o                  \
                  tasks/03_strided_bw.o                   \
                  tasks/04_size_bw.o                      \

@@ -44,7 +44,7 @@
 #include "microbench/chasing_baf.h"
 #include "microbench/overwrite.h"
 
-struct latency_sbi *global_sbi  = NULL;
+struct latency_sbi *global_sbi         = NULL;
 static struct report_sbi *g_report_sbi = NULL;
 
 uint32_t *lfs_random_array = NULL;
@@ -616,15 +616,16 @@ static int lens_cxl_fs_fill_super(struct super_block *sb, void *data, int silent
 		return -ENODEV;
 	}
 
-	pr_info("NUMA node [%d] start [0x%llx] end [0x%llx]\n", node_id, node_start, node_end);
+	pr_info("%s: NUMA node [%d] start [0x%llx] end [0x%llx]\n", __func__, node_id, node_start, node_end);
 
 	sbi->phys_addr = node_start << PAGE_SHIFT;
 	sbi->initsize  = (node_end - node_start) << PAGE_SHIFT;
 	sbi->virt_addr = phys_to_virt(sbi->phys_addr);
+	pr_info("%s: phys_addr: 0x%llx, virt_addr: 0x%llx, size: 0x%lx\n", __func__, sbi->phys_addr, (u64)sbi->virt_addr, sbi->initsize);
 
 	global_sbi = sbi;
 
-	pr_info("done");
+	pr_info("%s: done", __func__);
 
 	return 0;
 }
